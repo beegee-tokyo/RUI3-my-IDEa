@@ -1,0 +1,11 @@
+RUI3-Modular/.vscode/c_cpp_properties.json
+RUI3-Modular/.vscode/settings.json
+RUI3-Modular/build
+RUI3-Modular/cache
+RUI3-Modular/flash-files
+RUI3-Modular/RAK*
+.config
+*.mp4
+Arduino15
+Arduino15.zip
+*pycache*

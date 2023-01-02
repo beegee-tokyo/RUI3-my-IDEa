@@ -1,0 +1,13 @@
+{
+    "buildPreferences": [
+        [
+            "compiler.cpp.extra_flags",
+            "-DRUI_DEV=2"
+        ]
+    ],
+    "configuration": "debug=l0,supportat=1",
+    "board": "rak_rui:apollo3:WisCoreRAK11720Board",
+    "port": "COM48",
+    "sketch": "RUI3-Modular.ino",
+    "output": "build"
+}
