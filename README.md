@@ -4,9 +4,11 @@
 # RUI3-Modular
 This is an approach to create applications with RUI3 without writing code.    
 It is as well trying to work without any installation effort.    
+The simple IDE is written in Python and might require to install some additional modules.
 
-# Remark
-This code is _**Work in progress**_ and far from finished. It is based on Python, but at the moment works only on Windows (Linux and MacOS needs testing).    
+## REMARK
+This code is _**Work in progress**_ and far from finished. It is based on Python, but at the moment works only on Windows (Linux and MacOS needs testing).     
+The repo is missing the required BSP's because the files are too large. The complete ZIP file including the BSP's can be downloaded from [Google Drive](https://drive.google.com/file/d/1urrvtsfqxffVnXEESbEryBydS33X3YlZ/view?usp=share_link).     
 
 # Content
 - [How does it work](#how-does-it-work)
@@ -25,7 +27,10 @@ This code is _**Work in progress**_ and far from finished. It is based on Python
 
 # How does it work
 
-Instead of installing Arduino IDE, installing BSP's and libraries, the usage of RUI3-Modular should be limited to just downloading the Github Repo, unzipping it on your computer, start a Python script and start creating an RUI3 based application for RAK3172, RAK4630 and RAK11720.     
+Instead of installing Arduino IDE, installing BSP's and libraries, the usage of RUI3-Modular is be limited to just downloading the compressed IDE, unzipping it on your computer, start a Python script and start creating an RUI3 based application for RAK3172, RAK4630 and RAK11720.    
+
+## REMARK
+For Windows an executable file is included in the compressed folder. rui3-my-idea.exe can be used only on Windows. It does not require to have Python installed.
 
 <img src="./assets/gui-overview.png" alt="RUI3 Modular GUI">
 
