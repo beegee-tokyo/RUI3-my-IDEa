@@ -44,7 +44,7 @@ The complete LoRaWAN communication is handled by RUI3, setup is done with WisToo
 
 This is a generic description for the six steps required to build an application. See below an example for two WisBlock modules.
 
-1) Start the GUI either from a shell with _**`py ./rui3_modular.pyw`**_ or by double clicking on the _**`rui3_modular_full.exe`**_ executable file (Only Windows for now).     
+1) Start the GUI either from a shell with _**`py ./rui3_my_idea.pyw`**_ or by double clicking on the _**`rui3_my_idea.exe`**_ executable file (Only Windows for now).     
 
 > ## REMARK
 > _**If the Python script doesn't start it might be that the Python library tkinter is missing. You can install the missing module with `post_install.bat` or `post_install.sh`.      
