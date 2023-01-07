@@ -57,7 +57,6 @@ class SerialPortManager:
                         serialPortByte = self.serialPort.read(1)
                         self.serialPortBuffer.append(
                             int.from_bytes(serialPortByte, byteorder='big'))
-
             except:
                 print("Serial Port exception")
                 self.port_connect_button.config(
@@ -65,7 +64,7 @@ class SerialPortManager:
                 self.isRunning = False
                 break
         
-        print("Thread stop")
+        print("Serial Receive thread stop")
 
         if self.serialPort.isOpen():
             self.serialPort.close()

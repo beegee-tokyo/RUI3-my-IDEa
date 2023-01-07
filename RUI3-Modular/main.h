@@ -31,6 +31,7 @@
 #endif
 
 // Globals
+uint8_t get_min_dr(uint16_t region, uint16_t payload_size);
 extern uint32_t g_send_repeat_time;
 extern volatile bool tx_active;
 

@@ -103,7 +103,7 @@ bool init_rak12047(void)
 	// Create a timer.
 	api.system.timer.create(RAK_TIMER_2, do_read_rak12047, RAK_TIMER_PERIODIC);
 	// Start the timer
-	api.system.timer.start(RAK_TIMER_1, sampling_interval * 1000, NULL);
+	api.system.timer.start(RAK_TIMER_2, sampling_interval * 1000, NULL);
 
 	return true;
 }
@@ -150,8 +150,9 @@ void do_read_rak12047(void *)
 
 #ifdef _RAK1901_TEMP_H_
 	get_rak1901_values(env_values);
-	// MYLOG("VOC", "Rh: %.2f T: %.2f", humidity, temperature);
-
+	temperature = env_values[0];
+	humidity = env_values[1];
+	MYLOG("VOC", "Rh: %.2f T: %.2f", humidity, temperature);
 	if ((temperature != 0.0) && (temperature != 0.0))
 	{
 		defaultRh = (uint16_t)(humidity * 65535 / 100);
@@ -159,8 +160,9 @@ void do_read_rak12047(void *)
 	}
 #elif defined _RAK1906_ENV_H_
 	get_rak1906_values(env_values);
-	// MYLOG("VOC", "Rh: %.2f T: %.2f", humidity, temperature);
-
+	temperature = env_values[0];
+	humidity = env_values[1];
+	MYLOG("VOC", "Rh: %.2f T: %.2f", humidity, temperature);
 	if ((temperature != 0.0) && (temperature != 0.0))
 	{
 		defaultRh = (uint16_t)(humidity * 65535 / 100);
@@ -200,7 +202,7 @@ void do_read_rak12047(void *)
 			uint32_t new_voc_index = voc_algorithm.process(srawVoc);
 			voc_index = ((voc_index + new_voc_index) / 2);
 		}
-		// MYLOG("VOC", "VOC Index: %ld", voc_index);
+		MYLOG("VOC", "VOC Index: %ld", voc_index);
 		voc_valid = true;
 	}
 

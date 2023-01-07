@@ -29,6 +29,9 @@ volatile bool tx_active = false;
 /** fPort to send packages */
 uint8_t set_fPort = 2;
 
+/** Enable automatic DR selection based on payload size */
+bool auto_dr_enabled = true;
+
 /**
  * @brief Callback after packet was received
  *
@@ -91,7 +94,7 @@ void joinCallback(int32_t status)
 	// MYLOG("JOIN-CB", "Join result %d", status);
 	if (status != 0)
 	{
-		if (!(ret = api.lorawan.join()))
+		// if (!(ret = api.lorawan.join()))
 		{
 			MYLOG("JOIN-CB", "LoRaWan OTAA - join fail! \r\n");
 		}
@@ -259,7 +262,31 @@ void send_packet(void)
 {
 	if (api.lorawan.nwm.get() == 1)
 	{
-		MYLOG("UPLINK", "Send packet with size %d on port %d", g_solution_data.getSize(), set_fPort);
+		uint8_t proposed_dr = get_min_dr(api.lorawan.band.get(), g_solution_data.getSize());
+		MYLOG("UPLINK", "Check if datarate allows payload size, proposed is DR %d, current DR is %d", proposed_dr, api.lorawan.dr.get());
+
+		if (proposed_dr == 16)
+		{
+			MYLOG("UPLINK", "No matching DR found");
+		}
+
+		if (proposed_dr < api.lorawan.dr.get())
+		{
+			MYLOG("UPLINK", "Proposed DR is lower than current selected, if enabled, switching to lower DR");
+			if (auto_dr_enabled)
+			{
+				api.lorawan.dr.set(proposed_dr);
+			}
+		}
+
+		if (proposed_dr > api.lorawan.dr.get())
+		{
+			MYLOG("UPLINK", "Proposed DR is higher than current selected, if enabled, switching to higher DR");
+			if (auto_dr_enabled)
+			{
+				api.lorawan.dr.set(proposed_dr);
+			}
+		}
 
 		// Send the packet
 		if (api.lorawan.send(g_solution_data.getSize(), g_solution_data.getBuffer(), set_fPort, g_confirmed_mode, g_confirmed_retry))
