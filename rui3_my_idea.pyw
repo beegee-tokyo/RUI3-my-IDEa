@@ -276,6 +276,17 @@ def toggle_debug():
         print("Enable Debug")
         debug_label_bt.config(text="Debug on", background="#00FF00")
 
+# Switch autoconfig DR on/off
+def toggle_auto_dr():
+    global auto_dr_label_bt
+    if get_auto_dr():
+        set_auto_dr(False)
+        print("Disable autoconfig DR")
+        auto_dr_label_bt.config(text="Auto DR off", background="#FA8072")
+    else:
+        set_auto_dr(True)
+        print("Enable autoconfig DR")
+        auto_dr_label_bt.config(text="Auto DR on", background="#00FF00")
 
 # Opens a thread to process the command
 # Starts the command, captures its output and
@@ -359,9 +370,16 @@ def verify_cb():
     result_bt.config(background="#1E90FF", text="Result")
 
     if get_debug():
-        build_flag = ' --build-property compiler.cpp.extra_flags=-DMY_DEBUG=1 '
+        if get_auto_dr():
+            build_flag = ' --build-property compiler.cpp.extra_flags="-DMY_DEBUG=1 -DAUTO_DR=1" '
+        else:
+            build_flag = ' --build-property compiler.cpp.extra_flags="-DMY_DEBUG=1 -DAUTO_DR=0" '
     else:
-        build_flag = ' --build-property compiler.cpp.extra_flags=-DMY_DEBUG=0 '
+        if get_auto_dr():
+            build_flag = ' --build-property compiler.cpp.extra_flags="-DMY_DEBUG=0 -DAUTO_DR=1" '
+        else:
+            build_flag = ' --build-property compiler.cpp.extra_flags="-DMY_DEBUG=0 -DAUTO_DR=0" '
+
 
     compile_command = arduino_cli_cmd + " compile -b " + selected_board + build_flag + "--output-dir ./RUI3-Modular/flash-files --build-path ./RUI3-Modular/build --build-cache-path ./RUI3-Modular/cache --no-color --verbose --library ./RUI3-Modular/libraries ./RUI3-Modular/RUI3-Modular.ino"
     headline = "Verify, this can take some time, be patient"
@@ -420,13 +438,17 @@ def upload_cb():
     print("Upload port was "+old_upload_port)
 
     if get_debug():
-        build_flag = ' --build-property compiler.cpp.extra_flags=-DMY_DEBUG=1 '
+        if get_auto_dr():
+            build_flag = ' --build-property compiler.cpp.extra_flags="-DMY_DEBUG=1 -DAUTO_DR=1" '
+        else:
+            build_flag = ' --build-property compiler.cpp.extra_flags="-DMY_DEBUG=1 -DAUTO_DR=0" '
     else:
-        build_flag = ' --build-property compiler.cpp.extra_flags=-DMY_DEBUG=0 '
+        if get_auto_dr():
+            build_flag = ' --build-property compiler.cpp.extra_flags="-DMY_DEBUG=0 -DAUTO_DR=1" '
+        else:
+            build_flag = ' --build-property compiler.cpp.extra_flags="-DMY_DEBUG=0 -DAUTO_DR=0" '
 
-    compile_command = arduino_cli_cmd + " compile -b " + selected_board + build_flag + "--output-dir ./RUI3-Modular/flash-files --build-path ./RUI3-Modular/build --build-cache-path ./RUI3-Modular/cache --upload -p " + \
-        upload_port + " --no-color --verbose --library ./RUI3-Modular/libraries ./RUI3-Modular/RUI3-Modular.ino"
-
+    compile_command = arduino_cli_cmd + " compile -b " + selected_board + build_flag + "--output-dir ./RUI3-Modular/flash-files --build-path ./RUI3-Modular/build --build-cache-path ./RUI3-Modular/cache --upload -p " + upload_port + " --no-color --verbose --library ./RUI3-Modular/libraries ./RUI3-Modular/RUI3-Modular.ino" 
     headline = "Upload to device, this can take some time, be patient"
     return_code = ext_app_to_log(compile_command, headline, True)
 
@@ -639,6 +661,13 @@ def check_config():
     else:
         print("Set label to Debug off")
         debug_label_bt.config(text="Debug off", background="#FA8072")
+
+    if get_auto_dr():
+        print("Set label to autoconf DR on")
+        auto_dr_label_bt.config(text="Auto DR on", background="#00FF00")
+    else:
+        print("Set label to autoconf DR off")
+        auto_dr_label_bt.config(text="Auto DR off", background="#FA8072")
     return
 
 # Callback on window close
@@ -811,6 +840,8 @@ port_label = tk.Label(text="Port: ???")
 port_label.grid(row=15, column=3)
 debug_label_bt = tk.Button(text="Debug: ???", background="#1E90FF", command=toggle_debug)
 debug_label_bt.grid(row=15, column=5)
+auto_dr_label_bt = tk.Button(text="Auto DR: ???", background="#1E90FF", command=toggle_auto_dr)
+auto_dr_label_bt.grid(row=15, column=7)
 
 # Cleanup the project folder
 for file_name in listdir("./RUI3-Modular"):
@@ -821,16 +852,16 @@ for file_name in listdir("./RUI3-Modular"):
 at_query_bt = tk.Button(text="?", background="#1E90FF",
                         command=lambda: at_command_selected(0))
 at_query_bt.grid(row=0, column=21, sticky='nsew')
-at_boot_bt = tk.Button(text="Boot", background="#1E90FF",
+at_boot_bt = tk.Button(text="BOOT", background="#1E90FF",
                        command=lambda: at_command_selected(1))
 at_boot_bt.grid(row=1, column=21, sticky='nsew')
-at_z_bt = tk.Button(text="Reset", background="#1E90FF",
+at_z_bt = tk.Button(text="Z\nReset", background="#1E90FF",
                     command=lambda: at_command_selected(2))
 at_z_bt.grid(row=2, column=21, sticky='nsew')
-at_bat_bt = tk.Button(text="Batt", background="#1E90FF",
+at_bat_bt = tk.Button(text="BAT", background="#1E90FF",
                       command=lambda: at_command_selected(3))
 at_bat_bt.grid(row=3, column=21, sticky='nsew')
-at_ver_bt = tk.Button(text="Ver", background="#1E90FF",
+at_ver_bt = tk.Button(text="VER", background="#1E90FF",
                       command=lambda: at_command_selected(4))
 at_ver_bt.grid(row=4, column=21, sticky='nsew')
 at_lpm_bt = tk.Button(text="LPM", background="#1E90FF",

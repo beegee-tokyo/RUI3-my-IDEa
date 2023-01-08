@@ -52,6 +52,8 @@ selected_slot = 'A'
 # Flag for debug on/off
 debug_on = True
 
+# Flag for autoconfig DR on/off
+auto_dr_on = True
 
 # Callback for Slot selection
 # Saves selected slot in "selected_slot"
@@ -808,6 +810,16 @@ def set_debug(new_level):
 	debug_on = new_level
 	return
 
+def get_auto_dr():
+	global aut0_dr_on
+	return auto_dr_on
+
+
+def set_auto_dr(new_level):
+	global auto_dr_on
+	auto_dr_on = new_level
+	return
+
 # Parse configuration line
 # Enables the module that is found in the line
 # var check_line - a single line of the configuration file
@@ -840,9 +852,14 @@ def get_last_config(check_line, main_window):
     global rak3372
     global rak11722
     global debug_on
+    global auto_dr_on
+
     if check_line == 'debug_off':
         print("Debug is off")
         debug_on = False
+    if check_line == 'auto_dr_off':
+        print("Auto DR is off")
+        auto_dr_on = False
     if check_line == 'RAK1901':
         rak1901 = enable_source(rak1901_bt, "RAK1901_temp.cpp")
     elif check_line == 'RAK1902':
@@ -1053,6 +1070,7 @@ def save_config(debug_on):
     global rak3372
     global rak4631
     global rak11722
+    global auto_dr_on
 
     print("Saving config")
 
@@ -1063,6 +1081,8 @@ def save_config(debug_on):
     f = open('./.config', 'w')
     if not debug_on:
         f.write("debug_off\n")
+    if not auto_dr_on:
+        f.write("auto_dr_off\n")
     if rak1901:
         f.write("RAK1901\n")
     if rak1902:

@@ -30,7 +30,11 @@ volatile bool tx_active = false;
 uint8_t set_fPort = 2;
 
 /** Enable automatic DR selection based on payload size */
+#if AUTO_DR == 1
 bool auto_dr_enabled = true;
+#else
+bool auto_dr_enabled = false;
+#endif
 
 /**
  * @brief Callback after packet was received
@@ -198,6 +202,16 @@ void setup()
 
 		sensor_handler(NULL);
 	}
+#if MY_DEBUG == 0
+	MYLOG("SETUP", "Debug is disabled");
+#else
+	MYLOG("SETUP", "Debug is enabled");
+#endif
+#if AUTO_DR == 0
+	MYLOG("SETUP", "Auto DR is disabled");
+#else
+	MYLOG("SETUP", "Auto DR is enabled");
+#endif
 }
 
 /**
