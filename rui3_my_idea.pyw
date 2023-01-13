@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import scrolledtext
 import tkinter.ttk as ttk
-from tkinter import messagebox
 import shutil
 import os
 from os import listdir
@@ -19,6 +18,7 @@ import threading
 import rui3_my_serial
 from rui3_my_serial import *
 from rui3_module_callbacks import *
+from rui3_message_box import *
 
 if platform == "darwin":
     from tkmacosx import Button
@@ -130,7 +130,7 @@ def select_port():
 # Manually connect/disconnect Serial Terminal
 def connect_cb():
     if (upload_port == ""):
-        messagebox.showerror("ERROR", "Select an upload port first")
+        rui3_message(main_window, "Select an upload port first")
         return
     if serialPortManager.isRunning:
         serialPortManager.stop()
@@ -307,17 +307,23 @@ def ext_app_to_log(command, headline, clear):
     output_field.update_idletasks()
 
     SW_MINIMIZE = 6
-    info = subprocess.STARTUPINFO()
-    info.dwFlags = subprocess.STARTF_USESHOWWINDOW
-    info.wShowWindow = SW_MINIMIZE
-    info.creationflags = subprocess.HIGH_PRIORITY_CLASS
+    if (platform == "win32"):
+        info = subprocess.STARTUPINFO()
+        info.dwFlags = subprocess.STARTF_USESHOWWINDOW
+        info.wShowWindow = SW_MINIMIZE
+        info.creationflags = subprocess.HIGH_PRIORITY_CLASS
 
-    proc = subprocess.Popen(command,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT,
-                            startupinfo=info,
-                            universal_newlines=True,
-                            creationflags=subprocess.HIGH_PRIORITY_CLASS)
+        proc = subprocess.Popen(command,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT,
+                                startupinfo=info,
+                                universal_newlines=True,
+                                creationflags=subprocess.HIGH_PRIORITY_CLASS)
+    else:
+        proc = subprocess.Popen(command,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT,
+                                universal_newlines=True)
 
     while True:
         line = proc.stdout.readline()
@@ -338,8 +344,6 @@ def ext_app_to_log(command, headline, clear):
 
     result = proc.returncode
 
-    print("Finished " + command + " Result " + str(result))
-
     return result
 
 # Start Arduino-CLI to verify the code
@@ -348,16 +352,18 @@ def verify_cb():
     selected_board = get_selected_board()
 
     if (not installation_complete):
-        messagebox.showerror("ERROR", "Installation required first")
+        rui3_message(main_window, "Installation required first")
         return
     if (selected_board == ""):
-        messagebox.showerror("ERROR", "Select a board first")
+        rui3_message(main_window, "Select a board first")
         return
     if (is_RAK11722()):
         if not os.path.exists("./Arduino15/packages/rak_rui/hardware/apollo3"):
-            messagebox.showerror(
-                "ERROR", "RAK11720 BSP is not installed. It requires manual installation! Please contact author of this application")
+            rui3_message(
+                main_window, "RAK11720 BSP is not installed. It requires manual installation! Please contact author of this application")
             return
+
+    open_busy_box("Verifying code\nPlease wait")
 
     if not os.path.exists("./RUI3-Modular/build"):
         os.mkdir("./RUI3-Modular/build")
@@ -371,29 +377,34 @@ def verify_cb():
 
     if get_debug():
         if get_auto_dr():
-            build_flag = ' --build-property compiler.cpp.extra_flags="-DMY_DEBUG=1 -DAUTO_DR=1" '
+            compile_command = [arduino_cli_cmd,  "compile", "-b", selected_board, "--build-property", "compiler.cpp.extra_flags=-DMY_DEBUG=1 -DAUTO_DR=1", "--output-dir", "./RUI3-Modular/flash-files",
+                               "--build-path", "./RUI3-Modular/build", "--build-cache-path", "./RUI3-Modular/cache", "--no-color", "--verbose", "--library", "./RUI3-Modular/libraries", "./RUI3-Modular/RUI3-Modular.ino"]
         else:
-            build_flag = ' --build-property compiler.cpp.extra_flags="-DMY_DEBUG=1 -DAUTO_DR=0" '
+            compile_command = [arduino_cli_cmd,  "compile", "-b", selected_board, "--build-property", "compiler.cpp.extra_flags=-DMY_DEBUG=1 -DAUTO_DR=0", "--output-dir", "./RUI3-Modular/flash-files",
+                               "--build-path", "./RUI3-Modular/build", "--build-cache-path", "./RUI3-Modular/cache", "--no-color", "--verbose", "--library", "./RUI3-Modular/libraries", "./RUI3-Modular/RUI3-Modular.ino"]
     else:
         if get_auto_dr():
-            build_flag = ' --build-property compiler.cpp.extra_flags="-DMY_DEBUG=0 -DAUTO_DR=1" '
+            compile_command = [arduino_cli_cmd,  "compile", "-b", selected_board, "--build-property", "compiler.cpp.extra_flags=-DMY_DEBUG=0 -DAUTO_DR=1", "--output-dir", "./RUI3-Modular/flash-files",
+                               "--build-path", "./RUI3-Modular/build", "--build-cache-path", "./RUI3-Modular/cache", "--no-color", "--verbose", "--library", "./RUI3-Modular/libraries", "./RUI3-Modular/RUI3-Modular.ino"]
         else:
-            build_flag = ' --build-property compiler.cpp.extra_flags="-DMY_DEBUG=0 -DAUTO_DR=0" '
+            compile_command = [arduino_cli_cmd,  "compile", "-b", selected_board, "--build-property", "compiler.cpp.extra_flags=-DMY_DEBUG=0 -DAUTO_DR=0", "--output-dir", "./RUI3-Modular/flash-files",
+                               "--build-path", "./RUI3-Modular/build", "--build-cache-path", "./RUI3-Modular/cache", "--no-color", "--verbose", "--library", "./RUI3-Modular/libraries", "./RUI3-Modular/RUI3-Modular.ino"]
 
-
-    compile_command = arduino_cli_cmd + " compile -b " + selected_board + build_flag + "--output-dir ./RUI3-Modular/flash-files --build-path ./RUI3-Modular/build --build-cache-path ./RUI3-Modular/cache --no-color --verbose --library ./RUI3-Modular/libraries ./RUI3-Modular/RUI3-Modular.ino"
     headline = "Verify, this can take some time, be patient"
     return_code = ext_app_to_log(compile_command, headline, True)
 
     if (return_code == 0):
+        print("Verify successful")
         open_info_box("Verify successful", "#00FF00", verify_menu)
         result_bt.config(background="#00FF00", text="SUCCESS")
     else:
+        print("Verify failed")
         open_info_box("Verify failed", "#F00F00", verify_menu)
         result_bt.config(background="#FA8072", text="FAIL")
 
     verify_menu.config(text="Verify", background="#CDB79E")
 
+    close_busy_box()
     return
 
 
@@ -406,19 +417,21 @@ def upload_cb():
     selected_board = get_selected_board()
 
     if (not installation_complete):
-        messagebox.showerror("ERROR", "Installation required first")
+        rui3_message(main_window, "Installation required first")
         return
     if (selected_board == ""):
-        messagebox.showerror("ERROR", "Select a board first")
+        rui3_message(main_window, "Select a board first")
         return
     if (upload_port == ""):
-        messagebox.showerror("ERROR", "Select an upload port first")
+        rui3_message(main_window, "Select an upload port first")
         return
     if (is_RAK11722()):
         if not os.path.exists("./Arduino15/packages/rak_rui/hardware/apollo3"):
-            messagebox.showerror(
-                "ERROR", "RAK11720 BSP is not installed. It requires manual installation! Please contact author of this application")
+            rui3_message(
+                main_window, "RAK11720 BSP is not installed. It requires manual installation! Please contact author of this application")
             return
+
+    open_busy_box("Compiling and Uploading\nPlease wait")
 
     if not os.path.exists("./RUI3-Modular/build"):
         os.mkdir("./RUI3-Modular/build")
@@ -439,16 +452,19 @@ def upload_cb():
 
     if get_debug():
         if get_auto_dr():
-            build_flag = ' --build-property compiler.cpp.extra_flags="-DMY_DEBUG=1 -DAUTO_DR=1" '
+            compile_command = [arduino_cli_cmd,  "compile", "-b", selected_board, "--build-property", "compiler.cpp.extra_flags=-DMY_DEBUG=1 -DAUTO_DR=1", "--output-dir", "./RUI3-Modular/flash-files",
+                               "--build-path", "./RUI3-Modular/build", "--build-cache-path", "./RUI3-Modular/cache", "--upload", "-p", upload_port, "--no-color", "--verbose", "--library", "./RUI3-Modular/libraries", "./RUI3-Modular/RUI3-Modular.ino"]
         else:
-            build_flag = ' --build-property compiler.cpp.extra_flags="-DMY_DEBUG=1 -DAUTO_DR=0" '
+            compile_command = [arduino_cli_cmd,  "compile", "-b", selected_board, "--build-property", "compiler.cpp.extra_flags=-DMY_DEBUG=1 -DAUTO_DR=0", "--output-dir", "./RUI3-Modular/flash-files",
+                               "--build-path", "./RUI3-Modular/build", "--build-cache-path", "./RUI3-Modular/cache", "--upload", "-p", upload_port, "--no-color", "--verbose", "--library", "./RUI3-Modular/libraries", "./RUI3-Modular/RUI3-Modular.ino"]
     else:
         if get_auto_dr():
-            build_flag = ' --build-property compiler.cpp.extra_flags="-DMY_DEBUG=0 -DAUTO_DR=1" '
+            compile_command = [arduino_cli_cmd,  "compile", "-b", selected_board, "--build-property", "compiler.cpp.extra_flags=-DMY_DEBUG=0 -DAUTO_DR=1", "--output-dir", "./RUI3-Modular/flash-files",
+                               "--build-path", "./RUI3-Modular/build", "--build-cache-path", "./RUI3-Modular/cache", "--upload", "-p", upload_port, "--no-color", "--verbose", "--library", "./RUI3-Modular/libraries", "./RUI3-Modular/RUI3-Modular.ino"]
         else:
-            build_flag = ' --build-property compiler.cpp.extra_flags="-DMY_DEBUG=0 -DAUTO_DR=0" '
+            compile_command = [arduino_cli_cmd,  "compile", "-b", selected_board, "--build-property", "compiler.cpp.extra_flags=-DMY_DEBUG=0 -DAUTO_DR=0", "--output-dir", "./RUI3-Modular/flash-files",
+                               "--build-path", "./RUI3-Modular/build", "--build-cache-path", "./RUI3-Modular/cache", "--upload", "-p", upload_port, "--no-color", "--verbose", "--library", "./RUI3-Modular/libraries", "./RUI3-Modular/RUI3-Modular.ino"]
 
-    compile_command = arduino_cli_cmd + " compile -b " + selected_board + build_flag + "--output-dir ./RUI3-Modular/flash-files --build-path ./RUI3-Modular/build --build-cache-path ./RUI3-Modular/cache --upload -p " + upload_port + " --no-color --verbose --library ./RUI3-Modular/libraries ./RUI3-Modular/RUI3-Modular.ino" 
     headline = "Upload to device, this can take some time, be patient"
     return_code = ext_app_to_log(compile_command, headline, True)
 
@@ -484,6 +500,7 @@ def upload_cb():
             print("Unknown Core")
 
     if (return_code == 0):
+        print("Upload successful")
         open_info_box("Upload successful", "#00FF00", upload_menu)
 
         result_bt.config(background="#00FF00", text="SUCCESS")
@@ -493,11 +510,13 @@ def upload_cb():
             recursive_update_textbox()
             port_connect_bt.config(text="Disconnect", background="#00FF00")
     else:
+        print("Upload failed")
         open_info_box("Upload failed", "#FF0000", upload_menu)
         result_bt.config(background="#FA8072", text="FAIL")
 
     upload_menu.config(text="Upload", background="#CDB79E")
 
+    close_busy_box()
     return
 
 
@@ -522,45 +541,46 @@ def clean_build_cb():
 def refresh_installation():
     global installation_complete
 
+    open_busy_box("Installing BSP\nPlease wait")
+
     # install_bt.config(text="busy", background="#FA8072")
     # result_bt.config(background="#1E90FF", text="Result")
 
-    compile_command = arduino_cli_cmd + " config delete board_manager.additional_urls"
+    compile_command = [arduino_cli_cmd, "config", "delete", "board_manager.additional_urls"]
     headline = "Cleaning up additional BSP URL's"
     return_code1 = ext_app_to_log(compile_command, headline, False)
     time.sleep(1)
 
-    compile_command = arduino_cli_cmd + \
-        " config add board_manager.additional_urls https://raw.githubusercontent.com/beegee-tokyo/test/main/beegee-patch-rui3.json"
-    # compile_command = arduino_cli_cmd + " config add board_manager.additional_urls https://raw.githubusercontent.com/RAKWireless/RAKwireless-Arduino-BSP-Index/staging/RUI_3.5.3/package_rakwireless.com_rui_index.json"
+    compile_command = [
+            arduino_cli_cmd, "config",  "add", "board_manager.additional_urls", "https://raw.githubusercontent.com/beegee-tokyo/test/main/beegee-patch-rui3.json"]
 
     headline = "Installing additional BSP URL's"
     return_code1 = ext_app_to_log(compile_command, headline, False)
     time.sleep(1)
 
-    compile_command = arduino_cli_cmd + " core update-index"
+    compile_command = [arduino_cli_cmd, "core",  "update-index"]
     headline = "Updating BSP's index"
     return_code2 = ext_app_to_log(compile_command, headline, False)
     time.sleep(1)
 
-    compile_command = arduino_cli_cmd + " core install rak_rui:nrf52"
+    compile_command = [arduino_cli_cmd, "core", "install", "rak_rui:nrf52"]
     headline = "Installing RAK4630 BSP, this can take quite some time"
     return_code3 = ext_app_to_log(compile_command, headline, False)
     time.sleep(1)
 
-    compile_command = arduino_cli_cmd + " core install rak_rui:stm32"
+    compile_command = [arduino_cli_cmd, "core", "install", "rak_rui:stm32"]
     headline = "Installing RAK3372 BSP, this can take quite some time"
     return_code4 = ext_app_to_log(compile_command, headline, False)
     time.sleep(1)
 
     # RAK11722 BSP is not yet released, no refresh possible
     #
-    # compile_command = arduino_cli_cmd + " core install rak_rui:apollo3"
     # headline = "Installing RAK11722 BSP, this can take quite some time"
-    # return_code5 = ext_app_to_log(compile_command, headline, False)
-    # time.sleep(1)
-    output_field.config(state=tk.NORMAL)
-    output_field.insert(tk.END, "RAK11720 is not yet released, no refresh possible\n\n")
+    compile_command = [arduino_cli_cmd, "core", "install", "rak_rui:apollo3"]
+    return_code5 = ext_app_to_log(compile_command, headline, False)
+    time.sleep(1)
+    # output_field.config(state=tk.NORMAL)
+    # output_field.insert(tk.END, "RAK11720 is not yet released, no refresh possible\n\n")
     # output_field.insert(tk.END, "\n\n")
 
     result = False
@@ -571,16 +591,15 @@ def refresh_installation():
         installation_complete = True
         result = True
         output_field.insert(tk.END, "BSP UPDATE SUCCESS")
-        # output_field.insert(tk.END, "\n\n")
     else:
         output_field.insert(tk.END, "BSP UPDATE FAILED")
-        # output_field.insert(tk.END, "\n\n")
 
     output_field.focus()
     output_field.update()
     output_field.update_idletasks()
     output_field.config(state=tk.DISABLED)
 
+    close_busy_box()
     return result
 
 # Check if BSP's are already installed
@@ -597,13 +616,13 @@ def check_installation():
             print("Try to download the BSP's from the cloud")
             result = refresh_installation()
         else:
+            open_busy_box("Installing BSP\nPlease wait")
             try:
                 if not os.path.exists("Arduino15"):
                     output_field.config(state=tk.NORMAL)
                     output_field.delete("1.0", "end")
                     output_field.update()
                     output_field.insert(tk.END, "Installing the BSP's, be patient")
-                    # output_field.insert(tk.END, "\n\n")
                     output_field.focus()
                     output_field.update()
                     output_field.update_idletasks()
@@ -621,12 +640,11 @@ def check_installation():
                     f.write('Installation success!')
                     f.close()
                 output_field.insert(tk.END, "\n\nSuccessfully installed BSP's")
-                # output_field.insert(tk.END, "\n\n")
                 output_field.focus()
                 output_field.update()
                 output_field.update_idletasks()
                 result = True
-
+        close_busy_box()
     return result
 
 # Read saved configuration
@@ -686,12 +704,6 @@ def on_closing():
             time.sleep(1)
             open_info_box("Serial Port still open, wait a moment","#FF0000", upload_menu)
             main_window.wait_window(this_msg_box)
-            # result = messagebox.askokcancel("Serial Port still open","OK to quit?")
-            # if result:
-            #     root.destroy()
-            # else:
-            #     # pass
-            #     return
     except:
         print("Closing thread failed")
         close_delayed = True
@@ -739,11 +751,38 @@ def open_info_box(text_to_show, background_color, anchor, wait =  False):
     port_label_win = tk.Label(this_msg_box, text="\n\n\n"+text_to_show+"\n\n\n")
     port_label_win.config(background=background_color)
     port_label_win.pack()
-    main_window.after(3000,close_mb)
+    main_window.after(3000,close_info_box)
 
-def close_mb():
+def close_info_box():
     global this_msg_box
     this_msg_box.destroy()
+
+def open_busy_box(text_to_show):
+    global busy_box
+
+    busy_box = tk.Text(main_window)
+    busy_box.config(background="#AAAAAA", font='bold')
+    menu_x = 0
+    menu_y = 0
+    width_x = main_window.winfo_width()
+    height_y = clear_log_bt.winfo_rooty() - main_window.winfo_rooty() + clear_log_bt.winfo_height()
+
+
+    print("clear_log x: " + str(clear_log_bt.winfo_rootx()) +
+          " y: " + str(clear_log_bt.winfo_rooty()))
+    print ("x: " + str(menu_x) + " y: "+ str(menu_y))
+    print("width: " + str(width_x) + " height: " + str(height_y))
+    busy_box.place(x=0, y=0, height=height_y, width=width_x)
+    busy_box.insert("1.0", "\n\n\n"+text_to_show+"\n\n\n")
+    busy_box.tag_configure("tag_name", justify='center')
+    busy_box.tag_add("tag_name", "1.0", "end")
+    busy_box.update()
+    busy_box.update_idletasks()
+
+
+def close_busy_box():
+    global busy_box
+    busy_box.destroy()
 
 # ==================================================
 # Main
@@ -771,10 +810,13 @@ init_buttons(main_window)
 result_bt = tk.Button(text="Result", background="#1E90FF")
 result_bt.grid(row=0, column=8, padx=5, pady=5, sticky='nsew')
 
+ico_file = "./rak-blue-dark-whirl.ico"
+
 # Detect which OS we are running on
 if platform == "linux" or platform == "linux2":
     print("Detected Linux")
     arduino_cli_cmd = "./arduino-cli_0.29.0_Linux_64bit/arduino-cli"
+    ico_file = "@./rak-blue-dark-whirl.xbm"
 elif platform == "darwin":
     print("Detected MacOS")
     arduino_cli_cmd = "./arduino-cli_0.29.0_macOS_64bit/arduino-cli"
@@ -908,7 +950,7 @@ main_window.protocol("WM_DELETE_WINDOW", on_closing)
 main_window.after(250, check_config)
 
 # Set the Window icon
-main_window.iconbitmap("./rak-blue-dark-whirl.ico")
+main_window.iconbitmap(ico_file)
 
 # Start the main window loop
 main_window.mainloop()

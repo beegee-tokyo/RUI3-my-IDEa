@@ -4,9 +4,9 @@ board_manager:
 daemon:
   port: "50051"
 directories:
-  data: .\Arduino15
-  downloads: .\Arduino15\staging
-  user: .\RUI3-Modular
+  data: ./Arduino15
+  downloads: ./Arduino15/staging
+  user: ./RUI3-Modular
 library:
   enable_unsafe_install: false
 logging:

@@ -105,8 +105,8 @@ void joinCallback(int32_t status)
 	}
 	else
 	{
-		bool result_set = api.lorawan.dr.set(g_data_rate);
-		MYLOG("JOIN-CB", "Set the data rate  %s", result_set ? "Success" : "Fail");
+		// bool result_set = api.lorawan.dr.set(g_data_rate);
+		// MYLOG("JOIN-CB", "Set the data rate  %s", result_set ? "Success" : "Fail");
 		MYLOG("JOIN-CB", "LoRaWan OTAA - joined! \r\n");
 		digitalWrite(LED_BLUE, LOW);
 	}
