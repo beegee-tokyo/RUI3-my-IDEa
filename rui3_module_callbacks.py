@@ -2,11 +2,19 @@ import tkinter as tk
 from tkinter import scrolledtext
 import tkinter.ttk as ttk
 from tkinter import messagebox
+from sys import platform
 import os
 from os import listdir
 import shutil
 import glob
 import time
+
+if platform == "darwin":
+    fg_ena = "#006400"
+    fg_dis = "#FF0000"
+else:
+    fg_ena = "#000000"
+    fg_dis = "#000000"
 
 # Arduino names of the WisDuo modules
 rak3372_board = "rak_rui:stm32:WisDuoRAK3172EvaluationBoard"
@@ -94,31 +102,31 @@ def init_buttons(window):
 
 	# Add the module buttons column 1
 	rak1901_bt = tk.Button(text="RAK1901\nT&H",
-						background="#FA8072", command=rak1901_cb)
+						background="#FA8072", command=rak1901_cb, fg=fg_dis)
 	rak1901_bt.grid(row=use_row, column=use_column, padx=5, pady=5, sticky='nsew')
 	use_row = use_row + 1
 	rak1902_bt = tk.Button(text="RAK1902\nBaro",
-						background="#FA8072", command=rak1902_cb)
+						background="#FA8072", command=rak1902_cb, fg=fg_dis)
 	rak1902_bt.grid(row=use_row, column=use_column, padx=5, pady=5, sticky='nsew')
 	use_row = use_row + 1
 	rak1903_bt = tk.Button(text="RAK1903\nLight",
-						background="#FA8072", command=rak1903_cb)
+						background="#FA8072", command=rak1903_cb, fg=fg_dis)
 	rak1903_bt.grid(row=use_row, column=use_column, padx=5, pady=5, sticky='nsew')
 	use_row = use_row + 1
 	rak1904_bt = tk.Button(text="RAK1904\nAcc",
-						background="#FA8072", command=rak1904_cb)
+						background="#FA8072", command=rak1904_cb, fg=fg_dis)
 	rak1904_bt.grid(row=use_row, column=use_column, padx=5, pady=5, sticky='nsew')
 	use_row = use_row + 1
 	rak1905_bt = tk.Button(text="RAK1905\n9DOF",
-						background="#FA8072", command=rak1905_cb)
+						background="#FA8072", command=rak1905_cb, fg=fg_dis)
 	rak1905_bt.grid(row=use_row, column=use_column, padx=5, pady=5, sticky='nsew')
 	use_row = use_row + 1
 	rak1906_bt = tk.Button(text="RAK1906\nEnv",
-						background="#FA8072", command=rak1906_cb)
+						background="#FA8072", command=rak1906_cb, fg=fg_dis)
 	rak1906_bt.grid(row=use_row, column=use_column, padx=5, pady=5, sticky='nsew')
 	use_row = use_row + 1
 	rak1921_bt = tk.Button(text="RAK1921\nOLED",
-						background="#FA8072", command=rak1921_cb)
+						background="#FA8072", command=rak1921_cb, fg=fg_dis)
 	rak1921_bt.grid(row=use_row, column=use_column, padx=5, pady=5, sticky='nsew')
 
 	use_row = 2
@@ -126,31 +134,31 @@ def init_buttons(window):
 
 	# Add the module buttons column 2
 	rak12002_bt = tk.Button(text="RAK12002\nRTC",
-							background="#FA8072", command=rak12002_cb)
+							background="#FA8072", command=rak12002_cb, fg=fg_dis)
 	rak12002_bt.grid(row=use_row, column=use_column, padx=5, pady=5, sticky='nsew')
 	use_row = use_row + 1
 	rak12003_bt = tk.Button(text="RAK12003\nFIR",
-							background="#FA8072", command=rak12003_cb)
+							background="#FA8072", command=rak12003_cb, fg=fg_dis)
 	rak12003_bt.grid(row=use_row, column=use_column, padx=5, pady=5, sticky='nsew')
 	use_row = use_row + 1
 	rak12008_bt = tk.Button(text="RAK12008\nCO2",
-							background="#FA8072", command=rak12008_cb)
+							background="#FA8072", command=rak12008_cb, fg=fg_dis)
 	rak12008_bt.grid(row=use_row, column=use_column, padx=5, pady=5, sticky='nsew')
 	use_row = use_row + 1
 	rak12010_bt = tk.Button(text="RAK12010\nLight",
-							background="#FA8072", command=rak12010_cb)
+							background="#FA8072", command=rak12010_cb, fg=fg_dis)
 	rak12010_bt.grid(row=use_row, column=use_column, padx=5, pady=5, sticky='nsew')
 	use_row = use_row + 1
 	rak12014_bt = tk.Button(text="RAK12014\nToF",
-							background="#FA8072", command=rak12014_cb)
+							background="#FA8072", command=rak12014_cb, fg=fg_dis)
 	rak12014_bt.grid(row=use_row, column=use_column, padx=5, pady=5, sticky='nsew')
 	use_row = use_row + 1
 	rak12019_bt = tk.Button(text="RAK12019\nUV",
-							background="#FA8072", command=rak12019_cb)
+							background="#FA8072", command=rak12019_cb, fg=fg_dis)
 	rak12019_bt.grid(row=use_row, column=use_column, padx=5, pady=5, sticky='nsew')
 	use_row = use_row + 1
 	rak12027_bt = tk.Button(text="RAK12027\nQuake",
-							background="#FA8072", command=rak12027_cb)
+							background="#FA8072", command=rak12027_cb, fg=fg_dis)
 	rak12027_bt.grid(row=use_row, column=use_column, padx=5, pady=5, sticky='nsew')
 
 	use_row = 2
@@ -158,27 +166,27 @@ def init_buttons(window):
 
 	# Add the module buttons column 3
 	rak12037_bt = tk.Button(text="RAK12037\nCO2",
-							background="#FA8072", command=rak12037_cb)
+							background="#FA8072", command=rak12037_cb, fg=fg_dis)
 	rak12037_bt.grid(row=use_row, column=use_column, padx=5, pady=5, sticky='nsew')
 	use_row = use_row + 1
 	rak12039_bt = tk.Button(text="RAK12039\nPM",
-							background="#FA8072", command=rak12039_cb)
+							background="#FA8072", command=rak12039_cb, fg=fg_dis)
 	rak12039_bt.grid(row=use_row, column=use_column, padx=5, pady=5, sticky='nsew')
 	use_row = use_row + 1
 	rak12040_bt = tk.Button(text="RAK12040\nTemp Arr",
-							background="#FA8072", command=rak12040_cb)
+							background="#FA8072", command=rak12040_cb, fg=fg_dis)
 	rak12040_bt.grid(row=use_row, column=use_column, padx=5, pady=5, sticky='nsew')
 	use_row = use_row + 1
 	rak12047_bt = tk.Button(text="RAK12047\nVOC",
-							background="#FA8072", command=rak12047_cb)
+							background="#FA8072", command=rak12047_cb, fg=fg_dis)
 	rak12047_bt.grid(row=use_row, column=use_column, padx=5, pady=5, sticky='nsew')
 	use_row = use_row + 1
 	rak12500_bt = tk.Button(text="RAK12500\nGNSS",
-							background="#FA8072", command=rak12500_cb)
+							background="#FA8072", command=rak12500_cb, fg=fg_dis)
 	rak12500_bt.grid(row=use_row, column=use_column, padx=5, pady=5, sticky='nsew')
 	use_row = use_row + 1
 	rak13011_bt = tk.Button(text="RAK13011\nSwitch",
-							background="#FA8072", command=rak13011_cb)
+							background="#FA8072", command=rak13011_cb, fg=fg_dis)
 	rak13011_bt.grid(row=use_row, column=use_column, padx=5, pady=5, sticky='nsew')
 
 	use_row = 2
@@ -186,15 +194,15 @@ def init_buttons(window):
 
 	# Add the core module selection buttons
 	rak3372_bt = tk.Button(
-	text="RAK3372", background="#FA8072", command=rak3372_cb)
+	text="RAK3372", background="#FA8072", command=rak3372_cb, fg=fg_dis)
 	rak3372_bt.grid(row=use_row, column=use_column, padx=5, pady=5, sticky='nsew')
 	use_row = use_row + 1
 	rak4631_bt = tk.Button(
-	text="RAK4631", background="#FA8072", command=rak4631_cb)
+	text="RAK4631", background="#FA8072", command=rak4631_cb, fg=fg_dis)
 	rak4631_bt.grid(row=use_row, column=use_column, padx=5, pady=5, sticky='nsew')
 	use_row = use_row + 1
 	rak11722_bt = tk.Button(
-	text="RAK11722", background="#FA8072", command=rak11722_cb)
+	text="RAK11722", background="#FA8072", command=rak11722_cb, fg=fg_dis)
 	rak11722_bt.grid(row=use_row, column=use_column, padx=5, pady=5, sticky='nsew')
 	# rak11722_bt["state"] = "disable"
 	
@@ -274,7 +282,7 @@ def ask_slot(module):
 # var source_name - name of the module to be removed
 def remove_source(module_bt, source_name):
 	print(source_name)
-	module_bt.config(background="#FA8072")
+	module_bt.config(background="#FA8072", fg=fg_dis)
 	for file_name in listdir("./RUI3-Modular"):
 		print("Found file " + file_name)
 		if file_name.startswith(source_name):
@@ -297,7 +305,7 @@ def remove_source(module_bt, source_name):
 # var source_name - source file required for the module
 # var header_name - header file required for the module (not required for all modules)
 def enable_source(module_bt, source_name, header_name=""):
-	module_bt.config(background="#00FF00")
+	module_bt.config(background="#00FF00", fg=fg_ena)
 	shutil.copy("./RUI3-Modular/module-files/"+source_name, "./RUI3-Modular")
 	if not (header_name == ""):
 		shutil.copy("./RUI3-Modular/module-files/" +
@@ -749,9 +757,9 @@ def rak3372_cb():
 	rak3372 = True
 	rak4631 = False
 	rak11722 = False
-	rak3372_bt.config(background="#00FF00")
-	rak4631_bt.config(background="#FA8072")
-	rak11722_bt.config(background="#FA8072")
+	rak3372_bt.config(background="#00FF00", fg=fg_ena)
+	rak4631_bt.config(background="#FA8072", fg=fg_dis)
+	rak11722_bt.config(background="#FA8072", fg=fg_dis)
 	module_label.config(text="Core: RAK3372")
 	return
 
@@ -772,9 +780,9 @@ def rak4631_cb():
 	rak3372 = False
 	rak4631 = True
 	rak11722 = False
-	rak3372_bt.config(background="#FA8072")
-	rak4631_bt.config(background="#00FF00")
-	rak11722_bt.config(background="#FA8072")
+	rak3372_bt.config(background="#FA8072", fg=fg_dis)
+	rak4631_bt.config(background="#00FF00", fg=fg_ena)
+	rak11722_bt.config(background="#FA8072", fg=fg_dis)
 	module_label.config(text="Core: RAK4631")
 	return
 
@@ -795,9 +803,9 @@ def rak11722_cb():
 	rak3372 = False
 	rak4631 = False
 	rak11722 = True
-	rak3372_bt.config(background="#FA8072")
-	rak4631_bt.config(background="#FA8072")
-	rak11722_bt.config(background="#00FF00")
+	rak3372_bt.config(background="#FA8072", fg=fg_dis)
+	rak4631_bt.config(background="#FA8072", fg=fg_dis)
+	rak11722_bt.config(background="#00FF00", fg=fg_ena)
 	module_label.config(text="RAK11722")
 	return
 
@@ -1016,9 +1024,9 @@ def get_last_config(check_line, main_window):
         rak4631 = False
         rak11722 = False
         selected_board = rak3372_board
-        rak3372_bt.config(background="#00FF00")
-        rak4631_bt.config(background="#FA8072")
-        rak11722_bt.config(background="#FA8072")
+        rak3372_bt.config(background="#00FF00", fg=fg_ena)
+        rak4631_bt.config(background="#FA8072", fg=fg_dis)
+        rak11722_bt.config(background="#FA8072", fg=fg_dis)
         module_label.config(text="Core: RAK3372")
     elif check_line == "RAK4631":
         selected_board = rak4631_board
@@ -1026,9 +1034,9 @@ def get_last_config(check_line, main_window):
         rak3372 = False
         rak11722 = False
         selected_board = rak4631_board
-        rak4631_bt.config(background="#00FF00")
-        rak3372_bt.config(background="#FA8072")
-        rak11722_bt.config(background="#FA8072")
+        rak4631_bt.config(background="#00FF00", fg=fg_ena)
+        rak3372_bt.config(background="#FA8072", fg=fg_dis)
+        rak11722_bt.config(background="#FA8072", fg=fg_dis)
         module_label.config(text="Core: RAK4631")
     elif check_line == "RAK11722":
         selected_board = rak11722_board
@@ -1036,9 +1044,9 @@ def get_last_config(check_line, main_window):
         rak3372 = False
         rak11722 = True
         selected_board = rak11722_board
-        rak4631_bt.config(background="#FA8072")
-        rak3372_bt.config(background="#FA8072")
-        rak11722_bt.config(background="#00FF00")
+        rak4631_bt.config(background="#FA8072", fg=fg_dis)
+        rak3372_bt.config(background="#FA8072", fg=fg_dis)
+        rak11722_bt.config(background="#00FF00", fg=fg_ena)
         module_label.config(text="Core: RAK11722")
 
     main_window.update_idletasks()

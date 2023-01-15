@@ -1,5 +1,11 @@
-pyinstaller --onefile -w -i rak-blue-dark-whirl.ico rui3_my_idea.pyw rui3_my_serial.py rui3_module_callbacks.py -n rui3_my_idea
+### MacOS
+pyinstaller --onefile --windowed -i rak-blue-dark-whirl.icns rui3_my_idea.pyw rui3_my_serial.py rui3_module_callbacks.py rui3_message_box.py -n rui3_my_idea_mac
+pyinstaller --windowed -i rak-blue-dark-whirl.icns rui3_my_idea.pyw rui3_my_serial.py rui3_module_callbacks.py rui3_message_box.py -n rui3_my_idea_mac
 
-pyinstaller --onefile -w -i rak-blue-dark-whirl.xmb rui3_my_idea.pyw rui3_my_serial.py rui3_module_callbacks.py -n rui3_my_idea
+### Windows
+py -m PyInstaller --onefile -w -i rak-blue-dark-whirl.ico rui3_my_idea.pyw rui3_my_serial.py rui3_module_callbacks.py rui3_message_box.py -n rui3_my_idea_win
+
+### Linux
+pyinstaller --onefile -w -i rak-blue-dark-whirl.xmb rui3_my_idea.pyw rui3_my_serial.py rui3_module_callbacks.py rui3_message_box.py  -n rui3_my_idea_linux
 
 Linux access to serial port ==> -G dialout <username>

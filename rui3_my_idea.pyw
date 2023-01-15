@@ -23,6 +23,13 @@ from rui3_message_box import *
 if platform == "darwin":
     from tkmacosx import Button
 
+if platform == "darwin":
+    fg_ena = "#006400"
+    fg_dis = "#FF0000"
+else:
+    fg_ena = "#000000"
+    fg_dis = "#000000"
+
 
 # Variables
 
@@ -270,11 +277,11 @@ def toggle_debug():
     if get_debug():
         set_debug(False)
         print("Disable debug")
-        debug_label_bt.config(text="Debug off", background="#FA8072")
+        debug_label_bt.config(text="Debug off", background="#FA8072", fg=fg_dis)
     else:
         set_debug(True)
         print("Enable Debug")
-        debug_label_bt.config(text="Debug on", background="#00FF00")
+        debug_label_bt.config(text="Debug on", background="#00FF00", fg=fg_ena)
 
 # Switch autoconfig DR on/off
 def toggle_auto_dr():
@@ -282,11 +289,11 @@ def toggle_auto_dr():
     if get_auto_dr():
         set_auto_dr(False)
         print("Disable autoconfig DR")
-        auto_dr_label_bt.config(text="Auto DR off", background="#FA8072")
+        auto_dr_label_bt.config(text="Auto DR off", background="#FA8072", fg=fg_dis)
     else:
         set_auto_dr(True)
         print("Enable autoconfig DR")
-        auto_dr_label_bt.config(text="Auto DR on", background="#00FF00")
+        auto_dr_label_bt.config(text="Auto DR on", background="#00FF00", fg=fg_ena)
 
 # Opens a thread to process the command
 # Starts the command, captures its output and
@@ -541,10 +548,8 @@ def clean_build_cb():
 def refresh_installation():
     global installation_complete
 
+    print("Refresh Installation started")
     open_busy_box("Installing BSP\nPlease wait")
-
-    # install_bt.config(text="busy", background="#FA8072")
-    # result_bt.config(background="#1E90FF", text="Result")
 
     compile_command = [arduino_cli_cmd, "config", "delete", "board_manager.additional_urls"]
     headline = "Cleaning up additional BSP URL's"
@@ -611,40 +616,72 @@ def check_installation():
     result = True
     if not os.path.exists("Arduino15"):
         print("Arduino15 folder doesn't exist")
-        if not os.path.exists("Arduino15.zip"):
-            print("Arduino15 ZIP file doesn't exist")
-            print("Try to download the BSP's from the cloud")
-            result = refresh_installation()
-        else:
-            open_busy_box("Installing BSP\nPlease wait")
-            try:
-                if not os.path.exists("Arduino15"):
-                    output_field.config(state=tk.NORMAL)
-                    output_field.delete("1.0", "end")
-                    output_field.update()
-                    output_field.insert(tk.END, "Installing the BSP's, be patient")
-                    output_field.focus()
-                    output_field.update()
-                    output_field.update_idletasks()
-                    with zipfile.ZipFile('Arduino15.zip', 'r') as zip:
-                        zip.extractall('.')
-                else:
-                    print("BSP's already installed")
-                    result = True
-            except:
-                print("Failed to unzip BSP's")
-                result = False
-            else:
-                print("Successfully installed BSP's")
-                with open('./.bsp', 'w') as f:
-                    f.write('Installation success!')
-                    f.close()
-                output_field.insert(tk.END, "\n\nSuccessfully installed BSP's")
+        try:
+                output_field.config(state=tk.NORMAL)
+                output_field.delete("1.0", "end")
+                output_field.update()
+                output_field.insert(tk.END, "Installing the BSP's, be patient\n")
                 output_field.focus()
                 output_field.update()
                 output_field.update_idletasks()
-                result = True
-        close_busy_box()
+
+                file_exists = False
+                bsp_file = ""
+                if platform == "linux" or platform == "linux2":
+                    if os.path.exists("Arduino15_linux.zip"):
+                        print("Extracting Linux")
+                        bsp_file = "Arduino15_linux.zip"
+                        file_exists = True
+                    else:
+                        print("Arduino15 ZIP file doesn't exist")
+                        print("Try to download the BSP's from the cloud")
+                        result = refresh_installation()
+                elif platform == "darwin":
+                    if os.path.exists("Arduino15_macos.zip"):
+                        print("Extracting Linux")
+                        bsp_file = "Arduino15_macos.zip"
+                        file_exists = True
+                    else:
+                        print("Arduino15 ZIP file doesn't exist")
+                        print("Try to download the BSP's from the cloud")
+                        result = refresh_installation()
+                elif platform == "win32":
+                    if os.path.exists("Arduino15.zip"):
+                        print("Extracting Linux")
+                        bsp_file = "Arduino15.zip"
+                        file_exists = True
+                    else:
+                        print("Arduino15 ZIP file doesn't exist")
+                        print("Try to download the BSP's from the cloud")
+                        result = refresh_installation()
+                else:
+                    print("OS detection failed")
+
+                if bsp_file == "":
+                    result = False
+                else:
+                    open_busy_box("Installing BSP\nPlease wait")
+                    with zipfile.ZipFile(bsp_file, 'r') as zip:
+                        zip.extractall('.')
+                    result = True
+                    close_busy_box()
+        except:
+                print("Failed to unzip BSP's")
+                result = False
+        else:
+            print("Successfully installed BSP's")
+            with open('./.bsp', 'w') as f:
+                f.write('Installation success!')
+                f.close()
+            output_field.insert(tk.END, "\n\nSuccessfully installed BSP's")
+            output_field.focus()
+            output_field.update()
+            output_field.update_idletasks()
+            result = True
+    else:
+        print("BSP's already installed")
+        result = True
+
     return result
 
 # Read saved configuration
@@ -820,6 +857,7 @@ if platform == "linux" or platform == "linux2":
 elif platform == "darwin":
     print("Detected MacOS")
     arduino_cli_cmd = "./arduino-cli_0.29.0_macOS_64bit/arduino-cli"
+    ico_file = "@./rak-blue-dark-whirl.icns"
 elif platform == "win32":
     print("Detected Windows")
     arduino_cli_cmd = "./arduino-cli_0.27.1_Windows_64bit/arduino-cli.exe"

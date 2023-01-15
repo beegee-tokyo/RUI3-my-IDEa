@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ['rui3_my_idea.pyw', 'rui3_my_serial.py', 'rui3_module_callbacks.py'],
+    ['rui3_my_idea.pyw', 'rui3_my_serial.py', 'rui3_module_callbacks.py', 'rui3_message_box.py'],
     pathex=[],
     binaries=[],
     datas=[],
