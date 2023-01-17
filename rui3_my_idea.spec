@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ['rui3_my_idea.pyw', 'rui3_my_serial.py', 'rui3_module_callbacks.py', 'rui3_message_box.py'],
+    ['rui3_my_idea.pyw'],
     pathex=[],
     binaries=[],
     datas=[],
@@ -35,11 +35,10 @@ exe = EXE(
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=False,
+    console=True,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['rak-blue-dark-whirl.ico'],
 )

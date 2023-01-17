@@ -5,6 +5,7 @@ RUI3-Modular/cache
 RUI3-Modular/flash-files
 RUI3-Modular/RAK*
 .config
+.bsp
 *.mp4
 Arduino15
 Arduino15.zip

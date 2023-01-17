@@ -26,9 +26,23 @@ if platform == "darwin":
 if platform == "darwin":
     fg_ena = "#006400"
     fg_dis = "#FF0000"
+    curr_path = os.getcwd() + '/'
+    if (curr_path == "//"):
+        curr_path = "/Users/"
+    for root, dir, files in os.walk(curr_path):
+        for file in files:
+            if file.endswith('rui3_my_idea.pyw'):
+                os.chdir(root)
+                curr_path = './'
+                # curr_path = root
+                # set_path(curr_path)
+                # print("MacOS path: "+curr_path)
+                print("CWD: "+os.getcwd())
+                break
 else:
     fg_ena = "#000000"
     fg_dis = "#000000"
+    curr_path = './'
 
 
 # Variables
@@ -38,7 +52,7 @@ most_used_commands = ['AT?', 'AT+BOOT', 'ATZ', 'AT+BAT=?', 'AT+VER=?', 'AT+LPM',
                       'AT+DEVEUI', 'AT+JOIN', 'AT+NJM', 'AT+CFM', 'AT+SEND', 'AT+DR', 'AT+BAND', 'AT+NWM', 'ATC+STATUS=?', 'ATC+SENDINT']
 
 # Platform dependend Arduino-CLI path
-arduino_cli_cmd = "./arduino-cli_0.27.1_Windows_64bit/arduino-cli.exe"
+arduino_cli_cmd = curr_path+"arduino-cli_0.27.1_Windows_64bit/arduino-cli.exe"
 
 # Buffer for Arduino-CLI calls
 compile_command = ""
@@ -233,13 +247,13 @@ def select_os_cb(selected):
     global file_menu_window
     if (selected == 2):
         print("Selected Linux")
-        arduino_cli_cmd = "./arduino-cli_0.29.0_Linux_64bit/arduino-cli"
+        arduino_cli_cmd = curr_path+"arduino-cli_0.29.0_Linux_64bit/arduino-cli"
     elif (selected == 1):
         print("Selected MacOS")
-        arduino_cli_cmd = "./arduino-cli_0.29.0_macOS_64bit/arduino-cli"
+        arduino_cli_cmd = curr_path+"arduino-cli_0.29.0_macOS_64bit/arduino-cli"
     elif (selected == 0):
         print("Selected Windows")
-        arduino_cli_cmd = "./arduino-cli_0.27.1_Windows_64bit/arduino-cli.exe"
+        arduino_cli_cmd = curr_path+"arduino-cli_0.27.1_Windows_64bit/arduino-cli.exe"
 
     os_select_window.destroy()
     file_menu_window.destroy()
@@ -365,37 +379,37 @@ def verify_cb():
         rui3_message(main_window, "Select a board first")
         return
     if (is_RAK11722()):
-        if not os.path.exists("./Arduino15/packages/rak_rui/hardware/apollo3"):
+        if not os.path.exists(curr_path+"Arduino15/packages/rak_rui/hardware/apollo3"):
             rui3_message(
                 main_window, "RAK11720 BSP is not installed. It requires manual installation! Please contact author of this application")
             return
 
     open_busy_box("Verifying code\nPlease wait")
 
-    if not os.path.exists("./RUI3-Modular/build"):
-        os.mkdir("./RUI3-Modular/build")
-    if not os.path.exists("./RUI3-Modular/cache"):
-        os.mkdir("./RUI3-Modular/cache")
-    if not os.path.exists("./RUI3-Modular/flash-files"):
-        os.mkdir("./RUI3-Modular/flash-files")
+    if not os.path.exists(curr_path+"RUI3-Modular/build"):
+        os.mkdir(curr_path+"RUI3-Modular/build")
+    if not os.path.exists(curr_path+"RUI3-Modular/cache"):
+        os.mkdir(curr_path+"RUI3-Modular/cache")
+    if not os.path.exists(curr_path+"RUI3-Modular/flash-files"):
+        os.mkdir(curr_path+"RUI3-Modular/flash-files")
 
     verify_menu.config(text="busy", background="#FA8072")
     result_bt.config(background="#1E90FF", text="Result")
 
     if get_debug():
         if get_auto_dr():
-            compile_command = [arduino_cli_cmd,  "compile", "-b", selected_board, "--build-property", "compiler.cpp.extra_flags=-DMY_DEBUG=1 -DAUTO_DR=1", "--output-dir", "./RUI3-Modular/flash-files",
-                               "--build-path", "./RUI3-Modular/build", "--build-cache-path", "./RUI3-Modular/cache", "--no-color", "--verbose", "--library", "./RUI3-Modular/libraries", "./RUI3-Modular/RUI3-Modular.ino"]
+            compile_command = [arduino_cli_cmd,  "compile", "-b", selected_board, "--build-property", "compiler.cpp.extra_flags=-DMY_DEBUG=1 -DAUTO_DR=1", "--output-dir", curr_path+"RUI3-Modular/flash-files",
+                               "--build-path", curr_path+"RUI3-Modular/build", "--build-cache-path", curr_path+"RUI3-Modular/cache", "--no-color", "--verbose", "--library", curr_path+"RUI3-Modular/libraries", curr_path+"RUI3-Modular/RUI3-Modular.ino"]
         else:
-            compile_command = [arduino_cli_cmd,  "compile", "-b", selected_board, "--build-property", "compiler.cpp.extra_flags=-DMY_DEBUG=1 -DAUTO_DR=0", "--output-dir", "./RUI3-Modular/flash-files",
-                               "--build-path", "./RUI3-Modular/build", "--build-cache-path", "./RUI3-Modular/cache", "--no-color", "--verbose", "--library", "./RUI3-Modular/libraries", "./RUI3-Modular/RUI3-Modular.ino"]
+            compile_command = [arduino_cli_cmd,  "compile", "-b", selected_board, "--build-property", "compiler.cpp.extra_flags=-DMY_DEBUG=1 -DAUTO_DR=0", "--output-dir", curr_path+"RUI3-Modular/flash-files",
+                               "--build-path", curr_path+"RUI3-Modular/build", "--build-cache-path", curr_path+"RUI3-Modular/cache", "--no-color", "--verbose", "--library", curr_path+"RUI3-Modular/libraries", curr_path+"RUI3-Modular/RUI3-Modular.ino"]
     else:
         if get_auto_dr():
-            compile_command = [arduino_cli_cmd,  "compile", "-b", selected_board, "--build-property", "compiler.cpp.extra_flags=-DMY_DEBUG=0 -DAUTO_DR=1", "--output-dir", "./RUI3-Modular/flash-files",
-                               "--build-path", "./RUI3-Modular/build", "--build-cache-path", "./RUI3-Modular/cache", "--no-color", "--verbose", "--library", "./RUI3-Modular/libraries", "./RUI3-Modular/RUI3-Modular.ino"]
+            compile_command = [arduino_cli_cmd,  "compile", "-b", selected_board, "--build-property", "compiler.cpp.extra_flags=-DMY_DEBUG=0 -DAUTO_DR=1", "--output-dir", curr_path+"RUI3-Modular/flash-files",
+                               "--build-path", curr_path+"RUI3-Modular/build", "--build-cache-path", curr_path+"RUI3-Modular/cache", "--no-color", "--verbose", "--library", curr_path+"RUI3-Modular/libraries", curr_path+"RUI3-Modular/RUI3-Modular.ino"]
         else:
-            compile_command = [arduino_cli_cmd,  "compile", "-b", selected_board, "--build-property", "compiler.cpp.extra_flags=-DMY_DEBUG=0 -DAUTO_DR=0", "--output-dir", "./RUI3-Modular/flash-files",
-                               "--build-path", "./RUI3-Modular/build", "--build-cache-path", "./RUI3-Modular/cache", "--no-color", "--verbose", "--library", "./RUI3-Modular/libraries", "./RUI3-Modular/RUI3-Modular.ino"]
+            compile_command = [arduino_cli_cmd,  "compile", "-b", selected_board, "--build-property", "compiler.cpp.extra_flags=-DMY_DEBUG=0 -DAUTO_DR=0", "--output-dir", curr_path+"RUI3-Modular/flash-files",
+                               "--build-path", curr_path+"RUI3-Modular/build", "--build-cache-path", curr_path+"RUI3-Modular/cache", "--no-color", "--verbose", "--library", curr_path+"RUI3-Modular/libraries", curr_path+"RUI3-Modular/RUI3-Modular.ino"]
 
     headline = "Verify, this can take some time, be patient"
     return_code = ext_app_to_log(compile_command, headline, True)
@@ -433,19 +447,19 @@ def upload_cb():
         rui3_message(main_window, "Select an upload port first")
         return
     if (is_RAK11722()):
-        if not os.path.exists("./Arduino15/packages/rak_rui/hardware/apollo3"):
+        if not os.path.exists(curr_path+"Arduino15/packages/rak_rui/hardware/apollo3"):
             rui3_message(
                 main_window, "RAK11720 BSP is not installed. It requires manual installation! Please contact author of this application")
             return
 
     open_busy_box("Compiling and Uploading\nPlease wait")
 
-    if not os.path.exists("./RUI3-Modular/build"):
-        os.mkdir("./RUI3-Modular/build")
-    if not os.path.exists("./RUI3-Modular/cache"):
-        os.mkdir("./RUI3-Modular/cache")
-    if not os.path.exists("./RUI3-Modular/flash-files"):
-        os.mkdir("./RUI3-Modular/flash-files")
+    if not os.path.exists(curr_path+"RUI3-Modular/build"):
+        os.mkdir(curr_path+"RUI3-Modular/build")
+    if not os.path.exists(curr_path+"RUI3-Modular/cache"):
+        os.mkdir(curr_path+"RUI3-Modular/cache")
+    if not os.path.exists(curr_path+"RUI3-Modular/flash-files"):
+        os.mkdir(curr_path+"RUI3-Modular/flash-files")
         
     if serialPortManager.isRunning:
         serialPortManager.stop()
@@ -459,18 +473,18 @@ def upload_cb():
 
     if get_debug():
         if get_auto_dr():
-            compile_command = [arduino_cli_cmd,  "compile", "-b", selected_board, "--build-property", "compiler.cpp.extra_flags=-DMY_DEBUG=1 -DAUTO_DR=1", "--output-dir", "./RUI3-Modular/flash-files",
-                               "--build-path", "./RUI3-Modular/build", "--build-cache-path", "./RUI3-Modular/cache", "--upload", "-p", upload_port, "--no-color", "--verbose", "--library", "./RUI3-Modular/libraries", "./RUI3-Modular/RUI3-Modular.ino"]
+            compile_command = [arduino_cli_cmd,  "compile", "-b", selected_board, "--build-property", "compiler.cpp.extra_flags=-DMY_DEBUG=1 -DAUTO_DR=1", "--output-dir", curr_path+"RUI3-Modular/flash-files",
+                               "--build-path", curr_path+"RUI3-Modular/build", "--build-cache-path", curr_path+"RUI3-Modular/cache", "--upload", "-p", upload_port, "--no-color", "--verbose", "--library", curr_path+"RUI3-Modular/libraries", curr_path+"RUI3-Modular/RUI3-Modular.ino"]
         else:
-            compile_command = [arduino_cli_cmd,  "compile", "-b", selected_board, "--build-property", "compiler.cpp.extra_flags=-DMY_DEBUG=1 -DAUTO_DR=0", "--output-dir", "./RUI3-Modular/flash-files",
-                               "--build-path", "./RUI3-Modular/build", "--build-cache-path", "./RUI3-Modular/cache", "--upload", "-p", upload_port, "--no-color", "--verbose", "--library", "./RUI3-Modular/libraries", "./RUI3-Modular/RUI3-Modular.ino"]
+            compile_command = [arduino_cli_cmd,  "compile", "-b", selected_board, "--build-property", "compiler.cpp.extra_flags=-DMY_DEBUG=1 -DAUTO_DR=0", "--output-dir", curr_path+"RUI3-Modular/flash-files",
+                               "--build-path", curr_path+"RUI3-Modular/build", "--build-cache-path", curr_path+"RUI3-Modular/cache", "--upload", "-p", upload_port, "--no-color", "--verbose", "--library", curr_path+"RUI3-Modular/libraries", curr_path+"RUI3-Modular/RUI3-Modular.ino"]
     else:
         if get_auto_dr():
-            compile_command = [arduino_cli_cmd,  "compile", "-b", selected_board, "--build-property", "compiler.cpp.extra_flags=-DMY_DEBUG=0 -DAUTO_DR=1", "--output-dir", "./RUI3-Modular/flash-files",
-                               "--build-path", "./RUI3-Modular/build", "--build-cache-path", "./RUI3-Modular/cache", "--upload", "-p", upload_port, "--no-color", "--verbose", "--library", "./RUI3-Modular/libraries", "./RUI3-Modular/RUI3-Modular.ino"]
+            compile_command = [arduino_cli_cmd,  "compile", "-b", selected_board, "--build-property", "compiler.cpp.extra_flags=-DMY_DEBUG=0 -DAUTO_DR=1", "--output-dir", curr_path+"RUI3-Modular/flash-files",
+                               "--build-path", curr_path+"RUI3-Modular/build", "--build-cache-path", curr_path+"RUI3-Modular/cache", "--upload", "-p", upload_port, "--no-color", "--verbose", "--library", curr_path+"RUI3-Modular/libraries", curr_path+"RUI3-Modular/RUI3-Modular.ino"]
         else:
-            compile_command = [arduino_cli_cmd,  "compile", "-b", selected_board, "--build-property", "compiler.cpp.extra_flags=-DMY_DEBUG=0 -DAUTO_DR=0", "--output-dir", "./RUI3-Modular/flash-files",
-                               "--build-path", "./RUI3-Modular/build", "--build-cache-path", "./RUI3-Modular/cache", "--upload", "-p", upload_port, "--no-color", "--verbose", "--library", "./RUI3-Modular/libraries", "./RUI3-Modular/RUI3-Modular.ino"]
+            compile_command = [arduino_cli_cmd,  "compile", "-b", selected_board, "--build-property", "compiler.cpp.extra_flags=-DMY_DEBUG=0 -DAUTO_DR=0", "--output-dir", curr_path+"RUI3-Modular/flash-files",
+                               "--build-path", curr_path+"RUI3-Modular/build", "--build-cache-path", curr_path+"RUI3-Modular/cache", "--upload", "-p", upload_port, "--no-color", "--verbose", "--library", curr_path+"RUI3-Modular/libraries", curr_path+"RUI3-Modular/RUI3-Modular.ino"]
 
     headline = "Upload to device, this can take some time, be patient"
     return_code = ext_app_to_log(compile_command, headline, True)
@@ -532,12 +546,12 @@ def upload_cb():
 def clean_build_cb():
     clean_menu.config(text="busy", background="#FA8072")
 
-    if os.path.exists("./RUI3-Modular/build"):
-        shutil.rmtree("./RUI3-Modular/build")
-    if os.path.exists("./RUI3-Modular/cache"):
-        shutil.rmtree("./RUI3-Modular/cache")
-    if os.path.exists("./RUI3-Modular/flash-files"):
-        shutil.rmtree("./RUI3-Modular/flash-files")
+    if os.path.exists(curr_path+"RUI3-Modular/build"):
+        shutil.rmtree(curr_path+"RUI3-Modular/build")
+    if os.path.exists(curr_path+"RUI3-Modular/cache"):
+        shutil.rmtree(curr_path+"RUI3-Modular/cache")
+    if os.path.exists(curr_path+"RUI3-Modular/flash-files"):
+        shutil.rmtree(curr_path+"RUI3-Modular/flash-files")
 
     clean_menu.config(text="Clean", background="#CDB79E")
     return
@@ -557,7 +571,10 @@ def refresh_installation():
     time.sleep(1)
 
     compile_command = [
-            arduino_cli_cmd, "config",  "add", "board_manager.additional_urls", "https://raw.githubusercontent.com/beegee-tokyo/test/main/beegee-patch-rui3.json"]
+            arduino_cli_cmd, "config",  "add", "board_manager.additional_urls", "https://raw.githubusercontent.com/beegee-tokyo/test/main/beegee-patch-rui3-test.json"]
+
+    # https://raw.githubusercontent.com/beegee-tokyo/test/main/beegee-patch-rui3-test.json
+    # http://giesecke.tk/test/beegee-patch-rui3-test.json
 
     headline = "Installing additional BSP URL's"
     return_code1 = ext_app_to_log(compile_command, headline, False)
@@ -590,7 +607,7 @@ def refresh_installation():
 
     result = False
     if (return_code1 == 0) and (return_code2 == 0) and (return_code3 == 0) and (return_code4 == 0):
-        with open('./.bsp', 'w') as f:
+        with open(curr_path+'.bsp', 'w') as f:
             f.write('Installation success!')
             f.close()
         installation_complete = True
@@ -657,27 +674,28 @@ def check_installation():
                 else:
                     print("OS detection failed")
 
-                if bsp_file == "":
-                    result = False
-                else:
+                if file_exists:
                     open_busy_box("Installing BSP\nPlease wait")
                     with zipfile.ZipFile(bsp_file, 'r') as zip:
                         zip.extractall('.')
                     result = True
                     close_busy_box()
         except:
-                print("Failed to unzip BSP's")
+                print("Exception while installing BSP's")
                 result = False
         else:
-            print("Successfully installed BSP's")
-            with open('./.bsp', 'w') as f:
-                f.write('Installation success!')
-                f.close()
-            output_field.insert(tk.END, "\n\nSuccessfully installed BSP's")
-            output_field.focus()
-            output_field.update()
-            output_field.update_idletasks()
-            result = True
+            if (result):
+                print("Successfully installed BSP's")
+                with open(curr_path+'.bsp', 'w') as f:
+                    f.write('Installation success!')
+                    f.close()
+                output_field.insert(tk.END, "\n\nSuccessfully installed BSP's")
+                output_field.focus()
+                output_field.update()
+                output_field.update_idletasks()
+                tk.Button.config(text="Refresh\nInstallation!", background="#CDB79E")
+            else:
+                print("Failed to install BSP's")
     else:
         print("BSP's already installed")
         result = True
@@ -689,6 +707,17 @@ def check_installation():
 # selected modules are enabled again
 def check_config():
     global debug_label_bt
+
+    # cwd_path = os.getcwd() + '/'
+    # output_field.config(state=tk.NORMAL)
+    # output_field.delete("1.0", "end")
+    # output_field.update()
+    # output_field.insert(tk.END, curr_path)
+    # output_field.insert(tk.END, "\n")
+    # output_field.focus()
+    # output_field.update()
+    # output_field.update_idletasks()
+
     check_installation()
 
     main_window.bind('<Return>', send_serial_cb)
@@ -697,10 +726,10 @@ def check_config():
 
     print("Win width: "+str(main_window.winfo_width()) +
           " height: "+str(main_window.winfo_height()))
-    if os.path.exists("./.config"):
+    if os.path.exists(curr_path+".config"):
         # read last config
         print("Get last config")
-        with open('./.config', 'r') as f:
+        with open(curr_path+'.config', 'r') as f:
             while True:
                 line = f.readline()
                 if not line:
@@ -752,6 +781,8 @@ def on_closing():
     # print("Done quitting")
     main_window.destroy()
     print("Done closing window")
+    # if (not platform == "darwin"):
+    #       exit()
     exit()
 
 
@@ -847,26 +878,30 @@ init_buttons(main_window)
 result_bt = tk.Button(text="Result", background="#1E90FF")
 result_bt.grid(row=0, column=8, padx=5, pady=5, sticky='nsew')
 
-ico_file = "./rak-blue-dark-whirl.ico"
+ico_file = curr_path+"rak-blue-dark-whirl.ico"
 
 # Detect which OS we are running on
 if platform == "linux" or platform == "linux2":
     print("Detected Linux")
-    arduino_cli_cmd = "./arduino-cli_0.29.0_Linux_64bit/arduino-cli"
+    arduino_cli_cmd = curr_path+"arduino-cli_0.29.0_Linux_64bit/arduino-cli"
     ico_file = "@./rak-blue-dark-whirl.xbm"
+    os.system("chmod 555 arduino-cli_0.29.0_Linux_64bit/arduino-cli")
 elif platform == "darwin":
     print("Detected MacOS")
-    arduino_cli_cmd = "./arduino-cli_0.29.0_macOS_64bit/arduino-cli"
+    arduino_cli_cmd = curr_path+"arduino-cli_0.29.0_macOS_64bit/arduino-cli"
     ico_file = "@./rak-blue-dark-whirl.icns"
+    os.system("chmod 555 arduino-cli_0.29.0_macOS_64bit/arduino-cli")
 elif platform == "win32":
     print("Detected Windows")
-    arduino_cli_cmd = "./arduino-cli_0.27.1_Windows_64bit/arduino-cli.exe"
+    arduino_cli_cmd = curr_path+"arduino-cli_0.27.1_Windows_64bit/arduino-cli.exe"
 else:
     print("OS detection failed")
 
+print("ArduinoCLI command: "+arduino_cli_cmd)
+
 # Setup the menu
 # add button for re-installation
-if not os.path.exists("./.bsp"):
+if not os.path.exists(curr_path+".bsp"):
     install_bt = tk.Button(text="INSTALL\nREQUIRED!", background="#FA8072", command=check_installation)
     install_bt.grid(row=0, column=0, sticky='nsew')
     installation_complete = False
@@ -924,9 +959,9 @@ auto_dr_label_bt = tk.Button(text="Auto DR: ???", background="#1E90FF", command=
 auto_dr_label_bt.grid(row=15, column=7)
 
 # Cleanup the project folder
-for file_name in listdir("./RUI3-Modular"):
+for file_name in listdir(curr_path+"RUI3-Modular"):
     if file_name.startswith('RAK'):
-        os.remove("./RUI3-Modular/" + file_name)
+        os.remove(curr_path+"RUI3-Modular/" + file_name)
 
 # Add common AT commands
 at_query_bt = tk.Button(text="?", background="#1E90FF",

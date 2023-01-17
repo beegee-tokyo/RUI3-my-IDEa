@@ -1,6 +1,6 @@
 board_manager:
   additional_urls:
-  - https://raw.githubusercontent.com/beegee-tokyo/test/main/beegee-patch-rui3.json
+  - https://raw.githubusercontent.com/beegee-tokyo/test/main/beegee-patch-rui3-test.json
 daemon:
   port: "50051"
 directories:

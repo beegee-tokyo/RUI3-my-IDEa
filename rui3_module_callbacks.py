@@ -63,6 +63,12 @@ debug_on = True
 # Flag for autoconfig DR on/off
 auto_dr_on = True
 
+local_path = './'
+
+def set_path(new_path):
+	global local_path
+	local_path = new_path
+
 # Callback for Slot selection
 # Saves selected slot in "selected_slot"
 # Closes the selection window
@@ -283,13 +289,13 @@ def ask_slot(module):
 def remove_source(module_bt, source_name):
 	print(source_name)
 	module_bt.config(background="#FA8072", fg=fg_dis)
-	for file_name in listdir("./RUI3-Modular"):
+	for file_name in listdir(local_path+"RUI3-Modular"):
 		print("Found file " + file_name)
 		if file_name.startswith(source_name):
 			print ("Delete " + file_name)
-			os.remove("./RUI3-Modular/" + file_name)
+			os.remove(local_path+"RUI3-Modular/" + file_name)
 
-	# fileList = glob.glob("./RUI3-Modular/"+source_name+"*")
+	# fileList = glob.glob(local_path+"RUI3-Modular/"+source_name+"*")
 	# # Iterate over the list of filepaths & remove each file.
 	# for filePath in fileList:
 	#	 try:
@@ -306,10 +312,10 @@ def remove_source(module_bt, source_name):
 # var header_name - header file required for the module (not required for all modules)
 def enable_source(module_bt, source_name, header_name=""):
 	module_bt.config(background="#00FF00", fg=fg_ena)
-	shutil.copy("./RUI3-Modular/module-files/"+source_name, "./RUI3-Modular")
+	shutil.copy(local_path+"RUI3-Modular/module-files/"+source_name, local_path+"RUI3-Modular")
 	if not (header_name == ""):
-		shutil.copy("./RUI3-Modular/module-files/" +
-					header_name, "./RUI3-Modular")
+		shutil.copy(local_path+"RUI3-Modular/module-files/" +
+					header_name, local_path+"RUI3-Modular")
 	return True
 
 # Clean up the build folders
@@ -317,12 +323,12 @@ def enable_source(module_bt, source_name, header_name=""):
 
 
 def clean_build():
-	if os.path.exists("./RUI3-Modular/build"):
-		shutil.rmtree("./RUI3-Modular/build")
-	if os.path.exists("./RUI3-Modular/cache"):
-		shutil.rmtree("./RUI3-Modular/cache")
-	if os.path.exists("./RUI3-Modular/flash-files"):
-		shutil.rmtree("./RUI3-Modular/flash-files")
+	if os.path.exists(local_path+"RUI3-Modular/build"):
+		shutil.rmtree(local_path+"RUI3-Modular/build")
+	if os.path.exists(local_path+"RUI3-Modular/cache"):
+		shutil.rmtree(local_path+"RUI3-Modular/cache")
+	if os.path.exists(local_path+"RUI3-Modular/flash-files"):
+		shutil.rmtree(local_path+"RUI3-Modular/flash-files")
 	return
 
 # Callback for RAK1901 selection button
@@ -683,7 +689,7 @@ def rak12500_cb():
 		rak12500 = False
 		rak12500_bt.config(background="#FA8072")
 		try:
-			os.remove("./RUI3-Modular/rak12500_gnss.cpp")
+			os.remove(local_path+"RUI3-Modular/rak12500_gnss.cpp")
 		except:
 			print("Could not delete RAK12500 files")
 		return
@@ -1083,10 +1089,10 @@ def save_config(debug_on):
     print("Saving config")
 
     # Remove saved config
-    if os.path.exists("./.config"):
-        os.remove("./.config")
+    if os.path.exists(local_path+".config"):
+        os.remove(local_path+".config")
     # Save current config
-    f = open('./.config', 'w')
+    f = open(local_path+'.config', 'w')
     if not debug_on:
         f.write("debug_off\n")
     if not auto_dr_on:
