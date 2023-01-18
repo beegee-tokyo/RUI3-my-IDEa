@@ -11,6 +11,7 @@ This code is _**Work in progress**_ and far from finished. It is based on Python
 The repo is missing the required BSP's because the files are too large. The complete ZIP file including the BSP's can be downloaded from [Google Drive](https://drive.google.com/file/d/1urrvtsfqxffVnXEESbEryBydS33X3YlZ/view?usp=share_link).     
 
 # Content
+- [Installation and starting the application](#installation-and-starting-the-application)
 - [How does it work](#how-does-it-work)
    - [Step-by-step tutorial](#step-by-step-tutorial)
    - [Video](#video)
@@ -22,6 +23,23 @@ The repo is missing the required BSP's because the files are too large. The comp
 
 | <img src="./assets/RAK-Whirls.png" alt="RAKWireless"> | <img src="./assets/RUI3.jpg" alt="RUI3" width=30%> | <img src="./assets/rakstar.jpg" alt="RAKstar" > |    
 | :-: | :-: | :-: |     
+
+----
+
+# Installation and starting the application
+
+## Windows and Linux (Raspberry Pi is not supported)
+
+Unzip the downloaded compressed file into a folder on your harddisk. Avoid long pathnames, keep it close to the root of a drive e.g. _**`C:/RUI3-my-IDEa`**_.     
+Start the application with _**`rui3_my_idea_win.exe`**_ ( _**Windows**_ ) or _**`rui3_my_idea_linux`**_  ( _**Linux**_ ).    
+On the first start the application will download the required files for the WisBlock Core modules. This can take some time. Make sure you have a stable internet connection and can access Github.com.     
+
+## Mac OS X
+
+Unzip the downloaded compressed file into your Documents folder. Do not use other folders or the application might not work.     
+Start the application with _**`rui3_my_idea_mac`**_.    
+Due to some limitations in Mac OS X, starting the application might take some time.    
+On the first start the application will download the required files for the WisBlock Core modules. This can take some time. Make sure you have a stable internet connection and can access Github.com.     
 
 ----
 

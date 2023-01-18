@@ -30,15 +30,16 @@ if platform == "darwin":
     if (curr_path == "//"):
         curr_path = "/Users/"
     for root, dir, files in os.walk(curr_path):
-        for file in files:
-            if file.endswith('rui3_my_idea.pyw'):
-                os.chdir(root)
-                curr_path = './'
-                # curr_path = root
-                # set_path(curr_path)
-                # print("MacOS path: "+curr_path)
-                print("CWD: "+os.getcwd())
-                break
+        if (root.endswith("Documents")):
+            for file in files:
+                if file.endswith('rui3_my_idea_v0_0_1.txt'):
+                    os.chdir(root)
+                    curr_path = './'
+                    # curr_path = root
+                    # set_path(curr_path)
+                    # print("MacOS path: "+curr_path)
+                    print("CWD: "+os.getcwd())
+                    break
 else:
     fg_ena = "#000000"
     fg_dis = "#000000"
@@ -628,6 +629,7 @@ def refresh_installation():
 # If not installed it starts refresh_installation
 # to install all required BSP's
 def check_installation():
+    global install_bt
     print("Checking installation")
 
     result = True
@@ -693,7 +695,7 @@ def check_installation():
                 output_field.focus()
                 output_field.update()
                 output_field.update_idletasks()
-                tk.Button.config(text="Refresh\nInstallation!", background="#CDB79E")
+                install_bt.config(text="Refresh\nInstallation!", background="#CDB79E")
             else:
                 print("Failed to install BSP's")
     else:
