@@ -9,6 +9,7 @@
  *
  */
 #include "main.h"
+#include "ArrayQueue.h"
 
 //******************************************************************//
 // RAK13011 INT1_PIN
@@ -67,62 +68,33 @@
 // #define SW_INT_PIN WB_IO6
 // #endif
 
-volatile uint8_t events_queue[50] = {0};
-
-volatile uint8_t event_ptr = 0;
+ArrayQueue Fifo;
 
 volatile int switch_status = 0;
 
 void switch_int_handler(void)
 {
 	MYLOG("REED", "Interrupt");
-	bool wake_handler = false;
-
-	if (event_ptr == 0)
-	{
-		wake_handler = true;
-	}
-
+	Serial.println("Interrupt");
 	switch_status = digitalRead(SW_INT_PIN);
 	if (switch_status == LOW)
 	{
-		digitalWrite(LED_GREEN, HIGH);
-		digitalWrite(LED_BLUE, LOW);
-		events_queue[event_ptr] = 0;
-		event_ptr++;
+		// digitalWrite(LED_GREEN, HIGH);
+		// digitalWrite(LED_BLUE, LOW);
+		Fifo.enQueue(false);
 	}
 	else
 	{
-		digitalWrite(LED_GREEN, LOW);
-		digitalWrite(LED_BLUE, HIGH);
-		events_queue[event_ptr] = 1;
-		event_ptr++;
+		// digitalWrite(LED_GREEN, LOW);
+		// digitalWrite(LED_BLUE, HIGH);
+		Fifo.enQueue(true);
 	}
 
-	// handle_rak13011(NULL);
-	if (wake_handler)
+	if (Fifo.getSize() == 1)
 	{
-		// handle_rak13011(NULL);
-		wake_handler = false;
-		MYLOG("REED", "Wake up Sensor Handler");
-		// 	// Wake the switch handler
+		// Wake the switch handler
 		api.system.timer.start(RAK_TIMER_2, 50, NULL);
 	}
-
-	// Wake the switch handler
-	// api.system.timer.start(RAK_TIMER_3, 10, NULL);
-
-	// if (!handler_active)
-	// {
-	// 	handler_active = true;
-	// 	api.system.timer.start(RAK_TIMER_3, 10, NULL);
-	// }
-	// else
-	// {
-	// 	api.system.timer.start(RAK_TIMER_3, 10000, NULL);
-	// }
-	// detachInterrupt(SW_INT_PIN);
-	// attachInterrupt(SW_INT_PIN, switch_int_handler, CHANGE);
 }
 
 bool init_rak13011(void)
@@ -150,6 +122,8 @@ void handle_rak13011(void *)
 		else
 		{
 			MYLOG("REED", "Switch bouncing");
+			// remove entry
+			Fifo.deQueue();
 			return;
 		}
 
@@ -164,24 +138,28 @@ void handle_rak13011(void *)
 		// Clear payload
 		g_solution_data.reset();
 
-		g_solution_data.addPresence(LPP_CHANNEL_SWITCH, events_queue[event_ptr] == 0 ? 0 : 1);
+		g_solution_data.addPresence(LPP_CHANNEL_SWITCH, !Fifo.deQueue() ? 0 : 1);
 
 		// Add battery voltage
 		g_solution_data.addVoltage(LPP_CHANNEL_BATT, api.system.bat.get());
 
 		// // Send the packet
 		send_packet();
-		event_ptr -= 1;
 	}
 	else
 	{
 		MYLOG("REED", "TX still active");
+		Fifo.deQueue();
 	}
 
-	MYLOG("REED", "event_ptr = %d", event_ptr);
-	if (event_ptr != 0)
+	MYLOG("REED", "Queue entries = %d", Fifo.getSize());
+	if (!Fifo.isEmpty())
 	{
 		// Event queue is not empty. Trigger next packet in 5 seconds
 		api.system.timer.start(RAK_TIMER_3, 5000, NULL);
+	}
+	else
+	{
+		Serial.println("Queue is empty");
 	}
 }

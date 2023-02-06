@@ -45,7 +45,7 @@ bool init_rak12047(void)
 	sgp40.begin(Wire);
 
 	uint16_t serialNumber[3];
-	uint8_t serialNumberSize = 3;
+	uint8_t serialNumberSize = 4;
 
 	uint16_t error = sgp40.getSerialNumber(serialNumber, serialNumberSize);
 

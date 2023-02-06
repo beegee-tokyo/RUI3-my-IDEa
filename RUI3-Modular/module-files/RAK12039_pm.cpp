@@ -35,6 +35,30 @@ bool init_rak12039(void)
 	// Wait for sensor wake-up
 	delay(300);
 	Wire.begin();
+
+	// Wait for sensor to go online
+	time_t wait_sensor = millis();
+	uint32_t error = 0;
+	while (1)
+	{
+		delay(500);
+		Wire.beginTransmission(0x12);
+		error = Wire.endTransmission();
+		if (error == 0)
+		{
+			MYLOG("SCAN", "RAK12039 answered at %ld ms", millis());
+			break;
+		}
+		if ((millis() - wait_sensor) > 5000)
+		{
+			MYLOG("SCAN", "RAK12039 timeout after 5000 ms");
+			pinMode(WB_IO6, INPUT);
+			break;
+		}
+	}
+
+	// Some modules support only 100kHz
+	Wire.setClock(100000);
 	if (!PMSA003I.begin())
 	{
 		MYLOG("Dust", "PMSA003I begin fail,please check connection!");
@@ -54,19 +78,21 @@ bool init_rak12039(void)
  */
 void read_rak12039(void)
 {
+	// Some modules support only 100kHz
+	Wire.setClock(100000);
 	if (PMSA003I.readDate(&data))
 	{
 
-		MYLOG("PMS","PMSA003I read date success.");
+		MYLOG("PMS", "PMSA003I read date success.");
 
-		g_solution_data.addVoc_index(LPP_CHANNEL_PM_1_0,data.pm10_env);
-		g_solution_data.addVoc_index(LPP_CHANNEL_PM_2_5,data.pm25_env);
-		g_solution_data.addVoc_index(LPP_CHANNEL_PM_10_0,data.pm100_env);
+		g_solution_data.addVoc_index(LPP_CHANNEL_PM_1_0, data.pm10_env);
+		g_solution_data.addVoc_index(LPP_CHANNEL_PM_2_5, data.pm25_env);
+		g_solution_data.addVoc_index(LPP_CHANNEL_PM_10_0, data.pm100_env);
 
-		MYLOG("PMS","Std PM ug/m3: PM 1.0 %d PM 2.5 %d PM 10 %d",data.pm10_standard,data.pm25_standard,data.pm100_standard);
-		MYLOG("PMS","Env PM ug/m3: PM 1.0 %d PM 2.5 %d PM 10 %d",data.pm10_env,data.pm25_env,data.pm100_env);
+		MYLOG("PMS", "Std PM ug/m3: PM 1.0 %d PM 2.5 %d PM 10 %d", data.pm10_standard, data.pm25_standard, data.pm100_standard);
+		MYLOG("PMS", "Env PM ug/m3: PM 1.0 %d PM 2.5 %d PM 10 %d", data.pm10_env, data.pm25_env, data.pm100_env);
 #if HAS_EPD > 0
-	set_pm_rak14000(data.pm10_env,data.pm25_env,data.pm100_env);
+		set_pm_rak14000(data.pm10_env, data.pm25_env, data.pm100_env);
 #endif
 	}
 	else

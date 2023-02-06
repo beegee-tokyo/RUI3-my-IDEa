@@ -7,9 +7,11 @@ RUI3-Modular/RAK*
 .config
 .bsp
 *.mp4
-Arduino15
+Arduino15*
 Arduino15.zip
 Arduino15_linux.zip
 Arduino15_macos.zip
 *pycache*
 RUI3-my-IDEa*.zip
+build
+dist

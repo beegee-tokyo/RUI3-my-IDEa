@@ -151,6 +151,7 @@ void init_modules(void)
 	{
 		MYLOG("MODS", "Could not initialize RAK12014");
 	}
+	else
 	{
 		Serial.println("+EVT:RAK12014 OK");
 	}
@@ -161,6 +162,7 @@ void init_modules(void)
 	{
 		MYLOG("MODS", "Could not initialize RAK12019");
 	}
+	else
 	{
 		Serial.println("+EVT:RAK12019 OK");
 	}
@@ -171,6 +173,7 @@ void init_modules(void)
 	{
 		MYLOG("MODS", "Could not initialize RAK12025");
 	}
+	else
 	{
 		Serial.println("+EVT:RAK12025 OK");
 	}
@@ -181,6 +184,7 @@ void init_modules(void)
 	{
 		MYLOG("MODS", "Could not initialize RAK12027");
 	}
+	else
 	{
 		Serial.println("+EVT:RAK12027 OK");
 	}
@@ -191,6 +195,7 @@ void init_modules(void)
 	{
 		MYLOG("MODS", "Could not initialize RAK12037");
 	}
+	else
 	{
 		Serial.println("+EVT:RAK12037 OK");
 	}
@@ -201,6 +206,7 @@ void init_modules(void)
 	{
 		MYLOG("MODS", "Could not initialize RAK12039");
 	}
+	else
 	{
 		Serial.println("+EVT:RAK12039 OK");
 	}
@@ -211,6 +217,7 @@ void init_modules(void)
 	{
 		MYLOG("MODS", "Could not initialize RAK12040");
 	}
+	else
 	{
 		Serial.println("+EVT:RAK12040 OK");
 	}
@@ -221,6 +228,7 @@ void init_modules(void)
 	{
 		MYLOG("MODS", "Could not initialize RAK12047");
 	}
+	else
 	{
 		Serial.println("+EVT:RAK12047 OK");
 	}
@@ -231,6 +239,7 @@ void init_modules(void)
 	{
 		MYLOG("MODS", "Could not initialize RAK12500");
 	}
+	else
 	{
 		Serial.println("+EVT:RAK12500 OK");
 	}
@@ -241,6 +250,7 @@ void init_modules(void)
 	{
 		MYLOG("MODS", "Could not initialize RAK13011");
 	}
+	else
 	{
 		Serial.println("+EVT:RAK13011 OK");
 	}

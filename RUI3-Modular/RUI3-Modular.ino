@@ -98,10 +98,9 @@ void joinCallback(int32_t status)
 	// MYLOG("JOIN-CB", "Join result %d", status);
 	if (status != 0)
 	{
-		// if (!(ret = api.lorawan.join()))
-		{
-			MYLOG("JOIN-CB", "LoRaWan OTAA - join fail! \r\n");
-		}
+		MYLOG("JOIN-CB", "LoRaWan OTAA - join fail! \r\n");
+		// To be checked if this makes sense
+		// api.lorawan.join();
 	}
 	else
 	{
@@ -143,26 +142,29 @@ void setup()
 	// Start Serial
 	Serial.begin(115200);
 
-#ifdef _VARIANT_RAK4630_
-	time_t serial_timeout = millis();
-	// On nRF52840 the USB serial is not available immediately
-	// while (!Serial.available())
-	while (!Serial)
-	{
-		if ((millis() - serial_timeout) < 15000)
-		{
-			delay(100);
-			digitalWrite(LED_GREEN, !digitalRead(LED_GREEN));
-		}
-		else
-		{
-			break;
-		}
-	}
-#else
-	// For RAK3172 just wait a little bit for the USB to be ready
+// #ifdef _VARIANT_RAK4630_
+// 	time_t serial_timeout = millis();
+// 	// On nRF52840 the USB serial is not available immediately
+// 	// while (!Serial.available())
+// 	while (!Serial)
+// 	{
+// 		if ((millis() - serial_timeout) < 15000)
+// 		{
+// 			delay(100);
+// 			digitalWrite(LED_GREEN, !digitalRead(LED_GREEN));
+// 		}
+// 		else
+// 		{
+// 			break;
+// 		}
+// 	}
+// #else
+// 	// For RAK3172 just wait a little bit for the USB to be ready
+// 	delay(5000);
+// #endif
+
+	// Delay for 5 seconds to give the chance for AT+BOOT
 	delay(5000);
-#endif
 
 	Serial.println("RAKwireless RUI3 Node");
 	Serial.println("------------------------------------------------------");
@@ -212,6 +214,25 @@ void setup()
 #else
 	MYLOG("SETUP", "Auto DR is enabled");
 #endif
+
+	if (api.lorawan.nwm.get() == 1)
+	{
+		if (g_confirmed_mode)
+		{
+			MYLOG("SETUP", "Confirmed enabled");
+		}
+		else
+		{
+			MYLOG("SETUP", "Confirmed disabled");
+		}
+
+		MYLOG("SETUP", "Retry = %d", g_confirmed_retry);
+
+		MYLOG("SETUP", "DR = %d", g_data_rate);
+	}
+
+	// To be checked if this makes sense
+	// api.lorawan.join();
 }
 
 /**
@@ -262,8 +283,8 @@ void sensor_handler(void *)
  */
 void loop()
 {
-	// api.system.sleep.all();
-	api.system.scheduler.task.destroy();
+	api.system.sleep.all();
+	// api.system.scheduler.task.destroy();
 }
 
 /**
@@ -283,29 +304,31 @@ void send_packet(void)
 		{
 			MYLOG("UPLINK", "No matching DR found");
 		}
-
-		if (proposed_dr < api.lorawan.dr.get())
+		else
 		{
-			MYLOG("UPLINK", "Proposed DR is lower than current selected, if enabled, switching to lower DR");
-			if (auto_dr_enabled)
+			if (proposed_dr < api.lorawan.dr.get())
 			{
-				api.lorawan.dr.set(proposed_dr);
+				if (auto_dr_enabled)
+				{
+					MYLOG("UPLINK", "Proposed DR is lower than current selected, if enabled, switching to lower DR");
+					api.lorawan.dr.set(proposed_dr);
+				}
 			}
-		}
 
-		if (proposed_dr > api.lorawan.dr.get())
-		{
-			MYLOG("UPLINK", "Proposed DR is higher than current selected, if enabled, switching to higher DR");
-			if (auto_dr_enabled)
+			if (proposed_dr > api.lorawan.dr.get())
 			{
-				api.lorawan.dr.set(proposed_dr);
+				if (auto_dr_enabled)
+				{
+					MYLOG("UPLINK", "Proposed DR is higher than current selected, if enabled, switching to higher DR");
+					api.lorawan.dr.set(proposed_dr);
+				}
 			}
 		}
 
 		// Send the packet
 		if (api.lorawan.send(g_solution_data.getSize(), g_solution_data.getBuffer(), set_fPort, g_confirmed_mode, g_confirmed_retry))
 		{
-			MYLOG("UPLINK", "Packet enqueued");
+			MYLOG("UPLINK", "Packet enqueued, size %d", g_solution_data.getSize());
 			tx_active = true;
 		}
 		else

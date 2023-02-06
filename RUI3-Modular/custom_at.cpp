@@ -26,7 +26,8 @@ bool init_interval_at(void)
 {
 	return api.system.atMode.add((char *)"SENDINT",
 								 (char *)"Set/Get the interval sending time values in seconds 0 = off, max 2,147,483 seconds",
-								 (char *)"SENDINT", interval_send_handler);
+								 (char *)"SENDINT", interval_send_handler,
+								 RAK_ATCMD_PERM_WRITE | RAK_ATCMD_PERM_READ);
 }
 
 /**
@@ -44,7 +45,7 @@ int interval_send_handler(SERIAL_PORT port, char *cmd, stParam *param)
 	if (param->argc == 1 && !strcmp(param->argv[0], "?"))
 	{
 		Serial.print(cmd);
-		Serial.printf("=%lds\r\n", g_send_repeat_time / 1000);
+		Serial.printf("=%ld\r\n", g_send_repeat_time / 1000);
 	}
 	else if (param->argc == 1)
 	{
@@ -93,7 +94,8 @@ bool init_status_at(void)
 {
 	return api.system.atMode.add((char *)"STATUS",
 								 (char *)"Get device information",
-								 (char *)"STATUS", status_handler);
+								 (char *)"STATUS", status_handler,
+								 RAK_ATCMD_PERM_READ);
 }
 
 /** Regions as text array */

@@ -14,16 +14,16 @@ import serial.tools.list_ports
 import zipfile
 import queue
 import threading
+import datetime
 
 import rui3_my_serial
 from rui3_my_serial import *
 from rui3_module_callbacks import *
 from rui3_message_box import *
 
+# check if MacOS
 if platform == "darwin":
     from tkmacosx import Button
-
-if platform == "darwin":
     fg_ena = "#006400"
     fg_dis = "#FF0000"
     curr_path = os.getcwd() + '/'
@@ -125,7 +125,7 @@ def select_port():
 
         open_info_box("Auto selected COM port: " +
                       upload_port, "#00FF00", port_menu)
-        
+
         return
 
     get_port_window = tk.Toplevel(main_window)
@@ -192,6 +192,7 @@ def send_serial_cb(self):
         for idx in range(last_commands.qsize()):
             print(last_commands.queue[idx])
 
+# Next command from saved list
 def command_list_down(self):
     global cmd_count
     global cmd_ptr
@@ -208,7 +209,7 @@ def command_list_down(self):
         serial_send_eb.focus_set()
     return
 
-
+# Last command from saved list
 def command_list_up(self):
     global cmd_count
     global cmd_ptr
@@ -241,58 +242,14 @@ def at_command_selected(index):
     serial_send_eb.update()
     serial_send_eb.focus_set()
 
-# Callback for selected OS
-# var selected - selected OS
-def select_os_cb(selected):
-    global os_select_window
-    global file_menu_window
-    if (selected == 2):
-        print("Selected Linux")
-        arduino_cli_cmd = curr_path+"arduino-cli_0.29.0_Linux_64bit/arduino-cli"
-    elif (selected == 1):
-        print("Selected MacOS")
-        arduino_cli_cmd = curr_path+"arduino-cli_0.29.0_macOS_64bit/arduino-cli"
-    elif (selected == 0):
-        print("Selected Windows")
-        arduino_cli_cmd = curr_path+"arduino-cli_0.27.1_Windows_64bit/arduino-cli.exe"
-
-    os_select_window.destroy()
-    file_menu_window.destroy()
-
-# Select OS window
-# Opens a window to select the OS
-def select_os():
-    global file_menu_window
-    global os_select_window
-    os_select_window = tk.Toplevel(file_menu_window)
-    menu_x = options_menu.winfo_rootx()
-    menu_y = options_menu.winfo_rooty()
-
-    os_select_window.geometry(
-        "+{}+{}".format(menu_x, menu_y))
-    os_select_window.config(background="#FFDEAD")
-
-    os_select_bt = tk.Button(os_select_window, text="Windows",
-                             background="#00FFFF", command=lambda: select_os_cb(0))
-    os_select_bt.pack(fill="both", expand=True)
-
-    os_select_bt = tk.Button(os_select_window, text="MacOS",
-                             background="#00FFFF", command=lambda: select_os_cb(1))
-    os_select_bt.pack(fill="both", expand=True)
-
-    os_select_bt = tk.Button(os_select_window, text="Linux",
-                             background="#00FFFF", command=lambda: select_os_cb(2))
-    os_select_bt.pack(fill="both", expand=True)
-
-    main_window.wait_window(os_select_window)
-
 # Switch debug on/off
 def toggle_debug():
     global debug_label_bt
     if get_debug():
         set_debug(False)
         print("Disable debug")
-        debug_label_bt.config(text="Debug off", background="#FA8072", fg=fg_dis)
+        debug_label_bt.config(
+            text="Debug off", background="#FA8072", fg=fg_dis)
     else:
         set_debug(True)
         print("Enable Debug")
@@ -304,11 +261,13 @@ def toggle_auto_dr():
     if get_auto_dr():
         set_auto_dr(False)
         print("Disable autoconfig DR")
-        auto_dr_label_bt.config(text="Auto DR off", background="#FA8072", fg=fg_dis)
+        auto_dr_label_bt.config(
+            text="Auto DR off", background="#FA8072", fg=fg_dis)
     else:
         set_auto_dr(True)
         print("Enable autoconfig DR")
-        auto_dr_label_bt.config(text="Auto DR on", background="#00FF00", fg=fg_ena)
+        auto_dr_label_bt.config(
+            text="Auto DR on", background="#00FF00", fg=fg_ena)
 
 # Opens a thread to process the command
 # Starts the command, captures its output and
@@ -328,6 +287,7 @@ def ext_app_to_log(command, headline, clear):
     output_field.update()
     output_field.update_idletasks()
 
+    start_time = datetime.datetime.now()
     SW_MINIMIZE = 6
     if (platform == "win32"):
         info = subprocess.STARTUPINFO()
@@ -357,12 +317,25 @@ def ext_app_to_log(command, headline, clear):
         output_field.update_idletasks()
         output_field.see(tk.END)
 
-    output_field.config(state=tk.DISABLED)
+    # output_field.config(state=tk.DISABLED)
 
     # Wait until process terminates (without using p.wait())
     while proc.poll() is None:
         # Process hasn't exited yet, let's wait some
         time.sleep(0.5)
+
+    end_time = datetime.datetime.now()
+    difference = end_time - start_time
+    minutes_elapsed, seconds_elapsed = divmod(difference.days * 86400 + difference.seconds, 60)
+    duration_str = '\nDuration: ' + str(minutes_elapsed) + ':' + str(seconds_elapsed)
+    print (duration_str)
+
+    output_field.insert(tk.END, duration_str)
+    # this triggers an update of the text area, otherwise it doesn't update
+    output_field.update()
+    output_field.update_idletasks()
+    output_field.see(tk.END)
+    output_field.config(state=tk.DISABLED)
 
     result = proc.returncode
 
@@ -461,7 +434,7 @@ def upload_cb():
         os.mkdir(curr_path+"RUI3-Modular/cache")
     if not os.path.exists(curr_path+"RUI3-Modular/flash-files"):
         os.mkdir(curr_path+"RUI3-Modular/flash-files")
-        
+
     if serialPortManager.isRunning:
         serialPortManager.stop()
         port_connect_bt.config(text="Connect", background="#1E90FF")
@@ -566,16 +539,18 @@ def refresh_installation():
     print("Refresh Installation started")
     open_busy_box("Installing BSP\nPlease wait")
 
-    compile_command = [arduino_cli_cmd, "config", "delete", "board_manager.additional_urls"]
+    compile_command = [arduino_cli_cmd, "config",
+                       "delete", "board_manager.additional_urls"]
     headline = "Cleaning up additional BSP URL's"
     return_code1 = ext_app_to_log(compile_command, headline, False)
     time.sleep(1)
 
-    compile_command = [
-            arduino_cli_cmd, "config",  "add", "board_manager.additional_urls", "https://raw.githubusercontent.com/beegee-tokyo/test/main/beegee-patch-rui3-test.json"]
+    # Released:               https://raw.githubusercontent.com/RAKWireless/RAKwireless-Arduino-BSP-Index/main/package_rakwireless.com_rui_index.json
+    # Public beta testing:    http://giesecke.tk/test/beegee-patch-rui3-test.json
+    # Internal alpha testing: https://raw.githubusercontent.com/beegee-tokyo/test/main/beegee-patch-rui3-test.json
 
-    # https://raw.githubusercontent.com/beegee-tokyo/test/main/beegee-patch-rui3-test.json
-    # http://giesecke.tk/test/beegee-patch-rui3-test.json
+    compile_command = [
+        arduino_cli_cmd, "config",  "add", "board_manager.additional_urls", "https://raw.githubusercontent.com/RAKWireless/RAKwireless-Arduino-BSP-Index/main/package_rakwireless.com_rui_index.json"]
 
     headline = "Installing additional BSP URL's"
     return_code1 = ext_app_to_log(compile_command, headline, False)
@@ -636,55 +611,55 @@ def check_installation():
     if not os.path.exists("Arduino15"):
         print("Arduino15 folder doesn't exist")
         try:
-                output_field.config(state=tk.NORMAL)
-                output_field.delete("1.0", "end")
-                output_field.update()
-                output_field.insert(tk.END, "Installing the BSP's, be patient\n")
-                output_field.focus()
-                output_field.update()
-                output_field.update_idletasks()
+            output_field.config(state=tk.NORMAL)
+            output_field.delete("1.0", "end")
+            output_field.update()
+            output_field.insert(tk.END, "Installing the BSP's, be patient\n")
+            output_field.focus()
+            output_field.update()
+            output_field.update_idletasks()
 
-                file_exists = False
-                bsp_file = ""
-                if platform == "linux" or platform == "linux2":
-                    if os.path.exists("Arduino15_linux.zip"):
-                        print("Extracting Linux")
-                        bsp_file = "Arduino15_linux.zip"
-                        file_exists = True
-                    else:
-                        print("Arduino15 ZIP file doesn't exist")
-                        print("Try to download the BSP's from the cloud")
-                        result = refresh_installation()
-                elif platform == "darwin":
-                    if os.path.exists("Arduino15_macos.zip"):
-                        print("Extracting Linux")
-                        bsp_file = "Arduino15_macos.zip"
-                        file_exists = True
-                    else:
-                        print("Arduino15 ZIP file doesn't exist")
-                        print("Try to download the BSP's from the cloud")
-                        result = refresh_installation()
-                elif platform == "win32":
-                    if os.path.exists("Arduino15.zip"):
-                        print("Extracting Linux")
-                        bsp_file = "Arduino15.zip"
-                        file_exists = True
-                    else:
-                        print("Arduino15 ZIP file doesn't exist")
-                        print("Try to download the BSP's from the cloud")
-                        result = refresh_installation()
+            file_exists = False
+            bsp_file = ""
+            if platform == "linux" or platform == "linux2":
+                if os.path.exists("Arduino15_linux.zip"):
+                    print("Extracting Linux")
+                    bsp_file = "Arduino15_linux.zip"
+                    file_exists = True
                 else:
-                    print("OS detection failed")
+                    print("Arduino15 ZIP file doesn't exist")
+                    print("Try to download the BSP's from the cloud")
+                    result = refresh_installation()
+            elif platform == "darwin":
+                if os.path.exists("Arduino15_macos.zip"):
+                    print("Extracting Linux")
+                    bsp_file = "Arduino15_macos.zip"
+                    file_exists = True
+                else:
+                    print("Arduino15 ZIP file doesn't exist")
+                    print("Try to download the BSP's from the cloud")
+                    result = refresh_installation()
+            elif platform == "win32":
+                if os.path.exists("Arduino15.zip"):
+                    print("Extracting Linux")
+                    bsp_file = "Arduino15.zip"
+                    file_exists = True
+                else:
+                    print("Arduino15 ZIP file doesn't exist")
+                    print("Try to download the BSP's from the cloud")
+                    result = refresh_installation()
+            else:
+                print("OS detection failed")
 
-                if file_exists:
-                    open_busy_box("Installing BSP\nPlease wait")
-                    with zipfile.ZipFile(bsp_file, 'r') as zip:
-                        zip.extractall('.')
-                    result = True
-                    close_busy_box()
+            if file_exists:
+                open_busy_box("Installing BSP\nPlease wait")
+                with zipfile.ZipFile(bsp_file, 'r') as zip:
+                    zip.extractall('.')
+                result = True
+                close_busy_box()
         except:
-                print("Exception while installing BSP's")
-                result = False
+            print("Exception while installing BSP's")
+            result = False
         else:
             if (result):
                 print("Successfully installed BSP's")
@@ -695,7 +670,8 @@ def check_installation():
                 output_field.focus()
                 output_field.update()
                 output_field.update_idletasks()
-                install_bt.config(text="Refresh\nInstallation!", background="#CDB79E")
+                install_bt.config(
+                    text="Refresh\nInstallation!", background="#CDB79E")
             else:
                 print("Failed to install BSP's")
     else:
@@ -770,7 +746,8 @@ def on_closing():
             print("Stopping Serial thread")
             close_delayed = True
             time.sleep(1)
-            open_info_box("Serial Port still open, wait a moment","#FF0000", upload_menu)
+            open_info_box("Serial Port still open, wait a moment",
+                          "#FF0000", upload_menu)
             main_window.wait_window(this_msg_box)
     except:
         print("Closing thread failed")
@@ -808,7 +785,8 @@ def recursive_update_textbox():
         rec_reader = None
         print("Recursive reader closed")
 
-def open_info_box(text_to_show, background_color, anchor, wait =  False):
+# Display an information box, closes by itself after 3 seconds
+def open_info_box(text_to_show, background_color, anchor, wait=False):
     global this_msg_box
 
     this_msg_box = tk.Toplevel(main_window)
@@ -818,15 +796,18 @@ def open_info_box(text_to_show, background_color, anchor, wait =  False):
     menu_y = anchor.winfo_rooty()
     menu_y = menu_y + anchor.winfo_height()
     this_msg_box.geometry("+{}+{}".format(menu_x, menu_y))
-    port_label_win = tk.Label(this_msg_box, text="\n\n\n"+text_to_show+"\n\n\n")
+    port_label_win = tk.Label(
+        this_msg_box, text="\n\n\n"+text_to_show+"\n\n\n")
     port_label_win.config(background=background_color)
     port_label_win.pack()
-    main_window.after(3000,close_info_box)
+    main_window.after(3000, close_info_box)
 
+# Closes the information box
 def close_info_box():
     global this_msg_box
     this_msg_box.destroy()
 
+# Opens a busy box and covers buttons
 def open_busy_box(text_to_show):
     global busy_box
 
@@ -835,12 +816,12 @@ def open_busy_box(text_to_show):
     menu_x = 0
     menu_y = 0
     width_x = main_window.winfo_width()
-    height_y = clear_log_bt.winfo_rooty() - main_window.winfo_rooty() + clear_log_bt.winfo_height()
-
+    height_y = clear_log_bt.winfo_rooty() - main_window.winfo_rooty() + \
+        clear_log_bt.winfo_height()
 
     print("clear_log x: " + str(clear_log_bt.winfo_rootx()) +
           " y: " + str(clear_log_bt.winfo_rooty()))
-    print ("x: " + str(menu_x) + " y: "+ str(menu_y))
+    print("x: " + str(menu_x) + " y: " + str(menu_y))
     print("width: " + str(width_x) + " height: " + str(height_y))
     busy_box.place(x=0, y=0, height=height_y, width=width_x)
     busy_box.insert("1.0", "\n\n\n"+text_to_show+"\n\n\n")
@@ -849,10 +830,11 @@ def open_busy_box(text_to_show):
     busy_box.update()
     busy_box.update_idletasks()
 
-
+# Closes the busy box
 def close_busy_box():
     global busy_box
     busy_box.destroy()
+
 
 # ==================================================
 # Main
@@ -904,15 +886,18 @@ print("ArduinoCLI command: "+arduino_cli_cmd)
 # Setup the menu
 # add button for re-installation
 if not os.path.exists(curr_path+".bsp"):
-    install_bt = tk.Button(text="INSTALL\nREQUIRED!", background="#FA8072", command=check_installation)
+    install_bt = tk.Button(text="INSTALL\nREQUIRED!",
+                           background="#FA8072", command=check_installation)
     install_bt.grid(row=0, column=0, sticky='nsew')
     installation_complete = False
 else:
-    install_bt = tk.Button(text="Refresh\nInstallation!", background="#CDB79E", command=refresh_installation)
+    install_bt = tk.Button(text="Refresh\nInstallation!",
+                           background="#CDB79E", command=refresh_installation)
     install_bt.grid(row=0, column=0, sticky='nsew')
     installation_complete = True
 # add button to select USB port
-port_menu = tk.Button(text="Select Port", background="#CDB79E", command=select_port)
+port_menu = tk.Button(text="Select Port",
+                      background="#CDB79E", command=select_port)
 port_menu.grid(row=0, column=2, sticky='nsew')
 # add button to verify code
 verify_menu = tk.Button(text="Verify", background="#CDB79E", command=verify_cb)
@@ -921,7 +906,8 @@ verify_menu.grid(row=0, column=4, sticky='nsew')
 upload_menu = tk.Button(text="Upload", background="#CDB79E", command=upload_cb)
 upload_menu.grid(row=0, column=5, sticky='nsew')
 # add button to clean build folders
-clean_menu = tk.Button(text="Clean", background="#CDB79E", command=clean_build_cb)
+clean_menu = tk.Button(
+    text="Clean", background="#CDB79E", command=clean_build_cb)
 clean_menu.grid(row=0, column=6, sticky='nsew')
 
 # Add a button to connect to Serial
@@ -955,9 +941,11 @@ output_field.grid(row=12, column=0, sticky='nsew', columnspan=20)
 # Add a status row at the bottom
 port_label = tk.Label(text="Port: ???")
 port_label.grid(row=15, column=3)
-debug_label_bt = tk.Button(text="Debug: ???", background="#1E90FF", command=toggle_debug)
+debug_label_bt = tk.Button(
+    text="Debug: ???", background="#1E90FF", command=toggle_debug)
 debug_label_bt.grid(row=15, column=5)
-auto_dr_label_bt = tk.Button(text="Auto DR: ???", background="#1E90FF", command=toggle_auto_dr)
+auto_dr_label_bt = tk.Button(
+    text="Auto DR: ???", background="#1E90FF", command=toggle_auto_dr)
 auto_dr_label_bt.grid(row=15, column=7)
 
 # Cleanup the project folder
