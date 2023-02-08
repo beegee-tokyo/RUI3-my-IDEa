@@ -107,8 +107,8 @@ bool read_rak1906()
 	MYLOG("BME", "P= %.2f R= %.2f", bme.pressure / 100.0, (float)(bme.gas_resistance) / 1000.0);
 #endif
 
-	_last_bme_temp = bme.humidity;
-	_last_bme_humid = bme.temperature;
+	_last_bme_humid = bme.humidity;
+	_last_bme_temp = bme.temperature;
 	_has_last_bme_values = true;
 
 	return true;
@@ -270,8 +270,8 @@ bool read_rak1906()
 	MYLOG("BME", "P= %.2f R= %.2f", bme.pressure() / 100.0, (float)(bme.gas()) / 1000.0);
 #endif
 
-	_last_bme_temp = bme.humidity();
-	_last_bme_humid = bme.temperature();
+	_last_bme_humid = bme.humidity;
+	_last_bme_temp = bme.temperature;
 	_has_last_bme_values = true;
 
 	return true;

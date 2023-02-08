@@ -171,6 +171,13 @@ def send_serial_cb(self):
     if serialPortManager.isRunning:
         print("Sending >>" + buffer + "<<")
         serialPortManager.send_buffer(buffer)
+        # add to display
+        serial_box.config(state=tk.NORMAL)
+        serial_box.insert(tk.END, '>> ' + buffer + '\n')
+        # autoscroll to the bottom
+        serial_box.see(tk.END)
+        serial_box.config(state=tk.DISABLED)
+
         add_cmd = True
         # Check if command queue has entries
         if (last_commands.empty() == False):
@@ -191,6 +198,27 @@ def send_serial_cb(self):
     if (last_commands.empty() == False):
         for idx in range(last_commands.qsize()):
             print(last_commands.queue[idx])
+
+
+# Update Serial terminal text box
+# Restarts itself in guiUpdateInterval milliseconds
+def recursive_update_textbox():
+    global rec_reader
+
+    # Recursively call recursive_update_textbox using Tkinter after() method
+    if serialPortManager.isRunning:
+        # Get last data from the buffer
+        serialPortBuffer = serialPortManager.read_buffer()
+        serial_box.config(state=tk.NORMAL)
+        serial_box.insert(tk.END, serialPortBuffer.decode("ascii"))
+        # autoscroll to the bottom
+        serial_box.see(tk.END)
+        serial_box.config(state=tk.DISABLED)
+        rec_reader = main_window.after(
+            guiUpdateInterval, recursive_update_textbox)
+    else:
+        rec_reader = None
+        print("Recursive reader closed")
 
 # Next command from saved list
 def command_list_down(self):
@@ -763,27 +791,6 @@ def on_closing():
     # if (not platform == "darwin"):
     #       exit()
     exit()
-
-
-# Update Serial terminal text box
-# Restarts itself in guiUpdateInterval milliseconds
-def recursive_update_textbox():
-    global rec_reader
-
-    # Recursively call recursive_update_textbox using Tkinter after() method
-    if serialPortManager.isRunning:
-        # Get last data from the buffer
-        serialPortBuffer = serialPortManager.read_buffer()
-        serial_box.config(state=tk.NORMAL)
-        serial_box.insert(tk.END, serialPortBuffer.decode("ascii"))
-        # autoscroll to the bottom
-        serial_box.see(tk.END)
-        serial_box.config(state=tk.DISABLED)
-        rec_reader = main_window.after(
-            guiUpdateInterval, recursive_update_textbox)
-    else:
-        rec_reader = None
-        print("Recursive reader closed")
 
 # Display an information box, closes by itself after 3 seconds
 def open_info_box(text_to_show, background_color, anchor, wait=False):
