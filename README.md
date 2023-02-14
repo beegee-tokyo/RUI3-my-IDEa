@@ -46,6 +46,7 @@ On the first start the application will download the required files for the WisB
 # How does it work
 
 Instead of installing Arduino IDE, installing BSP's and libraries, the usage of RUI3-Modular is be limited to just downloading the compressed IDE, unzipping it on your computer, start a Python script and start creating an RUI3 based application for RAK3172, RAK4630 and RAK11720.    
+On the first start it will install the required BSP files automatically.
 
 ## REMARK
 For Windows an executable file is included in the compressed folder. rui3-my-idea.exe can be used only on Windows. It does not require to have Python installed.
@@ -148,7 +149,7 @@ This list is just an overview what is used.
 - [CayenneLPP](https://github.com/ElectronicCats/CayenneLPP) ⤴️
 - [ArduinoJson](https://registry.platformio.org/libraries/bblanchon/ArduinoJson) ⤴️
 ## Sensor libraries
-- [RAKwireless RAK1901 Temperature and Humidity SHTC3](https://downloads.rakwireless.com/RUI/RUI3/Library/RAKwireless_RAK1901_Temperature_and_Humidity_SHTC3.zip) (manual from ZIP) ⤴️
+- [RAKwireless RAK1901 Temperature and Humidity SHTC3](https://downloads.rakwireless.com/RUI/RUI3/Library/RAKwireless_RAK1901_Temperature_and_Humidity_SHTC3.zip) (manual - [RAKwireless RAK1906 Environment BME680](https://downloads.rakwireless.com/RUI/RUI3/Library/RAKwireless_RAK1906_Environment_BME680.zip) (manual from ZIP) ⤴️
 - [Adafruit LPS2X](https://github.com/adafruit/Adafruit_LPS2X) ⤴️
 - [ClosedCube OPT3001](https://github.com/beegee-tokyo/ClosedCube_OPT3001_Arduino) ⤴️
 - [Sparkfun LIS3DH](https://github.com/sparkfun/SparkFun_LIS3DH_Arduino_Library) ⤴️
