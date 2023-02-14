@@ -9,17 +9,29 @@ import stat
 import subprocess
 from subprocess import Popen, PIPE, STDOUT
 import time
+import sys
 from sys import platform
+import serial
 import serial.tools.list_ports
 import zipfile
 import queue
 import threading
+from threading import Thread
 import datetime
 
 import rui3_my_serial
 from rui3_my_serial import *
 from rui3_module_callbacks import *
 from rui3_message_box import *
+
+# Released:               https://raw.githubusercontent.com/RAKWireless/RAKwireless-Arduino-BSP-Index/main/package_rakwireless.com_rui_index.json
+# Public beta testing:    http://giesecke.tk/test/beegee-patch-rui3-test.json
+# Internal alpha testing: https://raw.githubusercontent.com/beegee-tokyo/test/main/beegee-patch-rui3-test.json
+
+json_3_4_2 = 'http://giesecke.tk/test/beegee-patch-rui3-432.json'
+json_4_x_x = 'https://raw.githubusercontent.com/beegee-tokyo/test/main/beegee-patch-rui3-test.json'
+
+json_to_use = 'http://giesecke.tk/test/beegee-patch-rui3-432.json'
 
 # check if MacOS
 if platform == "darwin":
@@ -75,11 +87,15 @@ last_commands = queue.Queue(50)
 
 # Detect available serial ports
 # return - list with found serial ports
+
+
 def serial_ports():
     return serial.tools.list_ports.comports()
 
 # Serial port selection handler
 # var event - what event triggered the callback
+
+
 def select_port_selected(event):
     global found_ports
     global get_port_window
@@ -98,6 +114,8 @@ def select_port_selected(event):
     get_port_window.destroy()
 
 # Menu Message Box Select Port
+
+
 def select_port():
     global get_port_window
     global found_ports
@@ -150,6 +168,8 @@ def select_port():
     return
 
 # Manually connect/disconnect Serial Terminal
+
+
 def connect_cb():
     if (upload_port == ""):
         rui3_message(main_window, "Select an upload port first")
@@ -164,6 +184,8 @@ def connect_cb():
         recursive_update_textbox()
 
 # Send string over serial port
+
+
 def send_serial_cb(self):
     global cmd_count
     global cmd_ptr
@@ -221,6 +243,8 @@ def recursive_update_textbox():
         print("Recursive reader closed")
 
 # Next command from saved list
+
+
 def command_list_down(self):
     global cmd_count
     global cmd_ptr
@@ -238,6 +262,8 @@ def command_list_down(self):
     return
 
 # Last command from saved list
+
+
 def command_list_up(self):
     global cmd_count
     global cmd_ptr
@@ -255,6 +281,8 @@ def command_list_up(self):
     return
 
 # Clear serial log
+
+
 def clear_cb():
     print("Clear log")
     serial_box.config(state=tk.NORMAL)
@@ -264,6 +292,8 @@ def clear_cb():
 
 # Callback for AT command buttons
 # var index -  selected AT command
+
+
 def at_command_selected(index):
     serial_send_eb.delete(0, "end")
     serial_send_eb.insert(tk.END, most_used_commands[index])
@@ -271,6 +301,8 @@ def at_command_selected(index):
     serial_send_eb.focus_set()
 
 # Switch debug on/off
+
+
 def toggle_debug():
     global debug_label_bt
     if get_debug():
@@ -284,6 +316,8 @@ def toggle_debug():
         debug_label_bt.config(text="Debug on", background="#00FF00", fg=fg_ena)
 
 # Switch autoconfig DR on/off
+
+
 def toggle_auto_dr():
     global auto_dr_label_bt
     if get_auto_dr():
@@ -304,6 +338,8 @@ def toggle_auto_dr():
 # var headline - first line to print in ouput window
 # var clear - flag if the output window should be cleared first
 # return - result of command execution
+
+
 def ext_app_to_log(command, headline, clear):
     output_field.config(state=tk.NORMAL)
     if clear:
@@ -354,9 +390,11 @@ def ext_app_to_log(command, headline, clear):
 
     end_time = datetime.datetime.now()
     difference = end_time - start_time
-    minutes_elapsed, seconds_elapsed = divmod(difference.days * 86400 + difference.seconds, 60)
-    duration_str = '\nDuration: ' + str(minutes_elapsed) + ':' + str(seconds_elapsed)
-    print (duration_str)
+    minutes_elapsed, seconds_elapsed = divmod(
+        difference.days * 86400 + difference.seconds, 60)
+    duration_str = '\nDuration: ' + \
+        str(minutes_elapsed) + ':' + str(seconds_elapsed)
+    print(duration_str)
 
     output_field.insert(tk.END, duration_str)
     # this triggers an update of the text area, otherwise it doesn't update
@@ -371,6 +409,8 @@ def ext_app_to_log(command, headline, clear):
 
 # Start Arduino-CLI to verify the code
 # The result is shown in the result button result_bt
+
+
 def verify_cb():
     selected_board = get_selected_board()
 
@@ -563,6 +603,7 @@ def clean_build_cb():
 # The result is shown in the result button result_bt
 def refresh_installation():
     global installation_complete
+    global json_to_use
 
     print("Refresh Installation started")
     open_busy_box("Installing BSP\nPlease wait")
@@ -578,7 +619,7 @@ def refresh_installation():
     # Internal alpha testing: https://raw.githubusercontent.com/beegee-tokyo/test/main/beegee-patch-rui3-test.json
 
     compile_command = [
-        arduino_cli_cmd, "config",  "add", "board_manager.additional_urls", "https://raw.githubusercontent.com/RAKWireless/RAKwireless-Arduino-BSP-Index/main/package_rakwireless.com_rui_index.json"]
+        arduino_cli_cmd, "config",  "add", "board_manager.additional_urls", json_to_use]
 
     headline = "Installing additional BSP URL's"
     return_code1 = ext_app_to_log(compile_command, headline, False)
@@ -631,6 +672,8 @@ def refresh_installation():
 # Check if BSP's are already installed
 # If not installed it starts refresh_installation
 # to install all required BSP's
+
+
 def check_installation():
     global install_bt
     print("Checking installation")
@@ -711,6 +754,8 @@ def check_installation():
 # Read saved configuration
 # If a configuration exits, the last
 # selected modules are enabled again
+
+
 def check_config():
     global debug_label_bt
 
@@ -758,9 +803,29 @@ def check_config():
     else:
         print("Set label to autoconf DR off")
         auto_dr_label_bt.config(text="Auto DR off", background="#FA8072")
+
+    if (os.path.exists(curr_path+"Arduino15.4.x.x") and os.path.exists(curr_path+"Arduino15")) or (os.path.exists(curr_path+"Arduino15.3.4.2") and os.path.exists(curr_path+"Arduino15")):
+        print("Found valid installation")
+        if os.path.exists(curr_path+"Arduino15.4.x.x") and os.path.exists(curr_path+"Arduino15"):
+            print("Found 4.x.x and Arduino15 folder, assuming 3.4.2 is already installed")
+            clean_build_cb()
+            num_args = len(sys.argv)
+            if (num_args > 1):
+                ver_342_bt.config(background="#00FF00", fg=fg_ena)
+                ver_4xx_bt.config(background="#FA8072", fg=fg_dis)
+        if os.path.exists(curr_path+"Arduino15.3.4.2") and os.path.exists(curr_path+"Arduino15"):
+            print("Found 3.4.2 and Arduino15 folder, assuming 4.x.x is already installed")
+            clean_build_cb()
+            num_args = len(sys.argv)
+            if (num_args > 1):
+               ver_342_bt.config(background="#FA8072", fg=fg_dis)
+               ver_4xx_bt.config(background="#00FF00", fg=fg_ena)
+
     return
 
 # Callback on window close
+
+
 def on_closing():
     global rec_reader
     global this_msg_box
@@ -793,6 +858,8 @@ def on_closing():
     exit()
 
 # Display an information box, closes by itself after 3 seconds
+
+
 def open_info_box(text_to_show, background_color, anchor, wait=False):
     global this_msg_box
 
@@ -810,11 +877,15 @@ def open_info_box(text_to_show, background_color, anchor, wait=False):
     main_window.after(3000, close_info_box)
 
 # Closes the information box
+
+
 def close_info_box():
     global this_msg_box
     this_msg_box.destroy()
 
 # Opens a busy box and covers buttons
+
+
 def open_busy_box(text_to_show):
     global busy_box
 
@@ -826,10 +897,10 @@ def open_busy_box(text_to_show):
     height_y = clear_log_bt.winfo_rooty() - main_window.winfo_rooty() + \
         clear_log_bt.winfo_height()
 
-    print("clear_log x: " + str(clear_log_bt.winfo_rootx()) +
-          " y: " + str(clear_log_bt.winfo_rooty()))
-    print("x: " + str(menu_x) + " y: " + str(menu_y))
-    print("width: " + str(width_x) + " height: " + str(height_y))
+    # print("clear_log x: " + str(clear_log_bt.winfo_rootx()) +
+    #       " y: " + str(clear_log_bt.winfo_rooty()))
+    # print("x: " + str(menu_x) + " y: " + str(menu_y))
+    # print("width: " + str(width_x) + " height: " + str(height_y))
     busy_box.place(x=0, y=0, height=height_y, width=width_x)
     busy_box.insert("1.0", "\n\n\n"+text_to_show+"\n\n\n")
     busy_box.tag_configure("tag_name", justify='center')
@@ -842,6 +913,106 @@ def close_busy_box():
     global busy_box
     busy_box.destroy()
 
+
+# Remove folder thread
+def remove_arduino_old():
+    shutil.rmtree(curr_path+"Arduino15_old")
+
+# Select firmware V3.4.2
+def install_342():
+    global json_to_use
+    global json_3_4_2
+    global ver_342_bt
+    global ver_4xx_bt
+
+    print('installing V3.4.2')
+    json_to_use = json_3_4_2
+
+    # Check if a valid installation exists
+    if (os.path.exists(curr_path+"Arduino15.4.x.x") and os.path.exists(curr_path+"Arduino15")) or (os.path.exists(curr_path+"Arduino15.3.4.2") and os.path.exists(curr_path+"Arduino15")):
+        print("Found valid installation")
+        if os.path.exists(curr_path+"Arduino15.3.4.2") and os.path.exists(curr_path+"Arduino15") and not os.path.exists(curr_path+"Arduino15.4.x.x"):
+            print("Found 3.4.2 and Arduino15 folder, assuming 4.x.x is installed")
+            os.rename(curr_path+"Arduino15", curr_path+"Arduino15.4.x.x")
+            os.rename(curr_path+"Arduino15.3.4.2", curr_path+"Arduino15")
+            clean_build_cb()
+            ver_342_bt.config(background="#00FF00", fg=fg_ena)
+            ver_4xx_bt.config(background="#FA8072", fg=fg_dis)
+            return
+
+        if os.path.exists(curr_path+"Arduino15.4.x.x") and os.path.exists(curr_path+"Arduino15"):
+            print("Found 4.x.x and Arduino15 folder, assuming 3.4.2 is already installed")
+            clean_build_cb()
+            ver_342_bt.config(background="#00FF00", fg=fg_ena)
+            ver_4xx_bt.config(background="#FA8072", fg=fg_dis)
+            return
+        print("Something is wrong")
+    else:
+        print("No valid installation found, start from scratch")
+        if os.path.exists(curr_path+"Arduino15"):
+            os.rename(curr_path+"Arduino15", curr_path+"Arduino15_old")
+            background_thread = Thread(target=remove_arduino_old, args=())
+            background_thread.start()
+
+        if not os.path.exists(curr_path+"Arduino15.4.x.x"):
+            print("No valid installation found, install 4.x.x")
+            json_to_use = json_4_x_x
+            refresh_installation()
+            os.rename(curr_path+"Arduino15", curr_path+"Arduino15.4.x.x")
+        print("No valid installation found, install 3.4.2")
+        json_to_use = json_3_4_2
+        refresh_installation()
+        clean_build_cb()
+        ver_342_bt.config(background="#00FF00", fg=fg_ena)
+        ver_4xx_bt.config(background="#FA8072", fg=fg_dis)
+        return
+
+def install_4xx():
+    global json_to_use
+    global json_4_x_x
+    global ver_342_bt
+    global ver_4xx_bt
+
+    print('Installing V4.x.x')
+    json_to_use = json_4_x_x
+
+    # Check if a valid installation exists
+    if (os.path.exists(curr_path+"Arduino15.4.x.x") and os.path.exists(curr_path+"Arduino15")) or (os.path.exists(curr_path+"Arduino15.3.4.2") and os.path.exists(curr_path+"Arduino15")):
+        print("Found valid installation")
+        if os.path.exists(curr_path+"Arduino15.4.x.x") and os.path.exists(curr_path+"Arduino15") and not os.path.exists(curr_path+"Arduino15.3.4.2"):
+            print("Found 4.x.x and Arduino15 folder, assuming 3.4.2 is installed")
+            os.rename(curr_path+"Arduino15", curr_path+"Arduino15.3.4.2")
+            os.rename(curr_path+"Arduino15.4.x.x", curr_path+"Arduino15")
+            clean_build_cb()
+            ver_342_bt.config(background="#FA8072", fg=fg_dis)
+            ver_4xx_bt.config(background="#00FF00", fg=fg_ena)
+            return
+
+        if os.path.exists(curr_path+"Arduino15.3.4.2") and os.path.exists(curr_path+"Arduino15"):
+            print("Found 3.4.2 and Arduino15 folder, assuming 4.x.x is already installed")
+            clean_build_cb()
+            ver_342_bt.config(background="#FA8072", fg=fg_dis)
+            ver_4xx_bt.config(background="#00FF00", fg=fg_ena)
+            return
+        print("Something is wrong")
+    else:
+        print("No valid installation found, start from scratch")
+        if os.path.exists(curr_path+"Arduino15"):
+            os.rename(curr_path+"Arduino15", curr_path+"Arduino15_old")
+            background_thread = Thread(target=remove_arduino_old, args=())
+            background_thread.start()
+        if not os.path.exists(curr_path+"Arduino15.3.4.2"):
+            print("No valid installation found, install 3.4.2")
+            json_to_use = json_3_4_2
+            refresh_installation()
+            os.rename(curr_path+"Arduino15", curr_path+"Arduino15.3.4.2")
+        print("No valid installation found, install 4.x.x")
+        json_to_use = json_4_x_x
+        refresh_installation()
+        clean_build_cb()
+        ver_342_bt.config(background="#FA8072", fg=fg_dis)
+        ver_4xx_bt.config(background="#00FF00", fg=fg_ena)
+        return
 
 # ==================================================
 # Main
@@ -1012,6 +1183,22 @@ at_status_bt.grid(row=6, column=22, sticky='nsew')
 at_int_bt = tk.Button(text="SEND\nINT", background="#1E90FF",
                       command=lambda: at_command_selected(17))
 at_int_bt.grid(row=7, column=22, sticky='nsew')
+
+num_args = len(sys.argv)
+if (num_args > 1):
+    ver_342_bt = tk.Button(text=" V3.4.2 \nstable", background="#FA8072",
+                        command=lambda: install_342())
+    ver_342_bt.grid(row=15, column=21, sticky='nsew')
+    ver_4xx_bt = tk.Button(text=" V4.x.x \nlatest", background="#FA8072",
+                        command=lambda: install_4xx())
+    ver_4xx_bt.grid(row=15, column=22, sticky='nsew')
+else:
+    ver_342_bt = tk.Button(text="", highlightthickness=0, relief='flat')
+    ver_342_bt.grid(row=15, column=21, sticky='nsew')
+    ver_342_bt["state"] = "disabled"
+    ver_4xx_bt = tk.Button(text="", highlightthickness=0, relief='flat')
+    ver_4xx_bt.grid(row=15, column=22, sticky='nsew')
+    ver_4xx_bt["state"] = "disabled"
 
 # Setup the callback when the window close button is pushed
 main_window.protocol("WM_DELETE_WINDOW", on_closing)

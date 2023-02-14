@@ -262,12 +262,12 @@ bool read_rak1906()
 
 	g_solution_data.addRelativeHumidity(LPP_CHANNEL_HUMID_2, bme.humidity());
 	g_solution_data.addTemperature(LPP_CHANNEL_TEMP_2, bme.temperature());
-	g_solution_data.addBarometricPressure(LPP_CHANNEL_PRESS_2, bme.pressure() / 100);
+	g_solution_data.addBarometricPressure(LPP_CHANNEL_PRESS_2, bme.pressure());
 	g_solution_data.addAnalogInput(LPP_CHANNEL_GAS_2, (float)(bme.gas()) / 1000.0);
 
 #if MY_DEBUG > 0
 	MYLOG("BME", "RH= %.2f T= %.2f", bme.humidity(), bme.temperature());
-	MYLOG("BME", "P= %.2f R= %.2f", bme.pressure() / 100.0, (float)(bme.gas()) / 1000.0);
+	MYLOG("BME", "P= %.2f R= %.2f", bme.pressure(), (float)(bme.gas()) / 1000.0);
 #endif
 
 	_last_bme_humid = bme.humidity();
