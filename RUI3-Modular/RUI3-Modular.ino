@@ -233,6 +233,9 @@ void setup()
 
 	// To be checked if this makes sense
 	// api.lorawan.join();
+
+	// Needs some strategy when to switch off the power for the modules
+	// digitalWrite(WB_IO2, LOW);
 }
 
 /**
